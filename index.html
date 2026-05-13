@@ -3,26 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Angry Pets: Ultimate Evolution - Final</title>
+    <title>Angry Pets:Balanced Chaos</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: #050510; overflow: hidden; touch-action: none; font-family: 'Arial Black', sans-serif; color: white; }
         canvas { background: #050510; display: none; }
-        
         #menu { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #050510; z-index: 100; padding: 20px; }
         .stats-bar { margin-bottom: 20px; color: #ffff00; font-size: 18px; text-shadow: 0 0 10px #ffff00; }
-        
         .pet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
         .pet-card { border: 2px solid #333; border-radius: 12px; padding: 8px; text-align: center; cursor: pointer; width: 95px; background: #111; transition: 0.3s; }
         .pet-card.selected { border-color: #ff0055; background: #220011; transform: scale(1.05); }
         .pet-card img { width: 50px; height: 50px; border-radius: 8px; }
-        
         .upgrade-section { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; width: 100%; max-width: 350px; margin-bottom: 20px; }
         .up-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 12px; }
         .up-btn { background: #00d2ff; border: none; padding: 5px 12px; border-radius: 5px; color: #000; font-weight: bold; cursor: pointer; }
-
         #btn-start { padding: 15px 50px; font-size: 22px; background: #ff0055; border: none; border-radius: 50px; color: white; font-weight: bold; cursor: pointer; box-shadow: 0 0 20px #ff0055; }
-        
         #hud { position: absolute; top: 10px; width: 100%; display: none; justify-content: space-between; padding: 0 20px; pointer-events: none; z-index: 10; font-size: 18px; }
         #angry-bar-cont { position: absolute; left: 20px; top: 70px; width: 15px; height: 130px; background: #222; border: 2px solid #ff0055; border-radius: 8px; }
         #angry-fill { width: 100%; height: 0%; background: linear-gradient(to top, #ff0055, #ffff00); position: absolute; bottom: 0; transition: 0.2s; }
@@ -32,19 +27,11 @@
 
 <div id="menu">
     <div class="stats-bar">TOPLAM YILDIZ: <span id="total-stars">0</span> ⭐️</div>
-    <div class="pet-grid" id="pet-grid"></div>
-    
+    <div id="pet-grid" class="pet-grid"></div>
     <div class="upgrade-section">
-        <div class="up-item">
-            <span>BAŞLANGIÇ CANI: <b id="level-hp">3</b></span>
-            <button class="up-btn" onclick="buyUpgrade('hp')">500 ⭐️</button>
-        </div>
-        <div class="up-item">
-            <span>ATEŞ HIZI: <b id="level-speed">1</b></span>
-            <button class="up-btn" onclick="buyUpgrade('speed')">300 ⭐️</button>
-        </div>
+        <div class="up-item"><span>BAŞLANGIÇ CANI: <b id="level-hp">3</b></span><button class="up-btn" onclick="buyUp('hp')">500 ⭐️</button></div>
+        <div class="up-item"><span>ATEŞ HIZI: <b id="level-speed">1</b></span><button class="up-btn" onclick="buyUp('speed')">300 ⭐️</button></div>
     </div>
-
     <button id="btn-start">SAVAŞI BAŞLAT</button>
 </div>
 
@@ -61,159 +48,131 @@
     const ctx = canvas.getContext('2d');
     const raw = "https://raw.githubusercontent.com/darwin456222-ops/Darwiizl/main/";
 
-    // --- KALICI VERİ ---
-    let saveData = JSON.parse(localStorage.getItem('angryPets_save')) || {
-        totalStars: 0, hpLevel: 3, speedLevel: 1
+    let gameData = JSON.parse(localStorage.getItem('p_data_x')) || { stars: 0, hpL: 3, spL: 1 };
+    function record() { localStorage.setItem('p_data_x', JSON.stringify(gameData)); refreshUI(); }
+    function refreshUI() {
+        document.getElementById('total-stars').innerText = gameData.stars;
+        document.getElementById('level-hp').innerText = gameData.hpL;
+        document.getElementById('level-speed').innerText = gameData.spL;
+    }
+    window.buyUp = (t) => {
+        if(t === 'hp' && gameData.stars >= 500) { gameData.stars -= 500; gameData.hpL++; }
+        else if(t === 'speed' && gameData.stars >= 300) { gameData.stars -= 300; gameData.spL++; }
+        record();
     };
 
-    function save() {
-        localStorage.setItem('angryPets_save', JSON.stringify(saveData));
-        updateMenuUI();
-    }
-
-    function updateMenuUI() {
-        document.getElementById('total-stars').innerText = saveData.totalStars;
-        document.getElementById('level-hp').innerText = saveData.hpLevel;
-        document.getElementById('level-speed').innerText = saveData.speedLevel;
-    }
-
-    window.buyUpgrade = (type) => {
-        if(type === 'hp' && saveData.totalStars >= 500) { saveData.totalStars -= 500; saveData.hpLevel++; }
-        else if(type === 'speed' && saveData.totalStars >= 300) { saveData.totalStars -= 300; saveData.speedLevel++; }
-        save();
-    };
-
-    const petData = [
-        { name: "Squeak", img: "squeak.jpg", fireRate: 25, type: "cross" },
-        { name: "Gus", img: "gus.jpg", fireRate: 45, type: "pierce" },
-        { name: "Blinky", img: "blinky.jpg", fireRate: 35, type: "star" },
-        { name: "Dot", img: "dot.jpg", fireRate: 10, type: "rapid" },
-        { name: "Sugar", img: "sugar.jpg", fireRate: 30, type: "spread" },
-        { name: "Flip", img: "flip.jpg", fireRate: 28, type: "boomerang" }
+    const petD = [
+        { name: "Squeak", img: "squeak.jpg", type: "cross" },
+        { name: "Gus", img: "gus.jpg", type: "pierce" },
+        { name: "Blinky", img: "blinky.jpg", type: "star" },
+        { name: "Dot", img: "dot.jpg", type: "rapid" },
+        { name: "Sugar", img: "sugar.jpg", type: "spread" },
+        { name: "Flip", img: "flip.jpg", type: "boomerang" }
     ];
 
-    let selectedIdx = 0, score = 0, hp = 3, gameRunning = false, frame = 0;
-    let enemies = [], bullets = [], helpers = [], images = {}, activePowers = [];
-    let angryLevel = 0, isAngry = false, shake = 0;
+    let selectedIdx = 0, score = 0, hp = 3, running = false, frame = 0;
+    let enemies = [], bullets = [], helpers = [], imgs = {}, activeP = [];
+    let angryL = 0, isAngry = false, shake = 0;
     const player = { x: 0, y: 0, r: 25 };
 
     const grid = document.getElementById('pet-grid');
-    petData.forEach((pet, i) => {
+    petD.forEach((p, i) => {
         const card = document.createElement('div');
         card.className = `pet-card ${i === 0 ? 'selected' : ''}`;
-        card.innerHTML = `<img src="${raw+pet.img}"><p style="font-size:10px">${pet.name}</p>`;
+        card.innerHTML = `<img src="${raw+p.img}"><p style="font-size:10px">${p.name}</p>`;
         card.onclick = () => {
             document.querySelectorAll('.pet-card').forEach(c => c.classList.remove('selected'));
-            card.classList.add('selected');
-            selectedIdx = i;
+            card.classList.add('selected'); selectedIdx = i;
         };
         grid.appendChild(card);
-        let img = new Image(); img.src = raw + pet.img; images[pet.name] = img;
+        let img = new Image(); img.src = raw + p.img; imgs[p.name] = img;
     });
 
     document.getElementById('btn-start').onclick = () => {
         document.getElementById('menu').style.display = 'none';
         document.getElementById('hud').style.display = 'flex';
         canvas.style.display = 'block';
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        player.x = canvas.width / 2;
-        player.y = canvas.height / 2;
-        hp = saveData.hpLevel;
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        player.x = canvas.width / 2; player.y = canvas.height / 2;
+        hp = gameData.hpL;
         document.getElementById('hp-txt').innerText = "CAN: " + hp;
-        activePowers = [petData[selectedIdx].type];
-        gameRunning = true;
-        loop();
+        activeP = [petD[selectedIdx].type];
+        running = true; loop();
     };
 
-    function spawnEnemy() {
-        let spawnChance = Math.max(8, 35 - Math.floor(score / 200));
-        if(frame % spawnChance !== 0) return;
+    function spawn() {
+        let rate = Math.max(4, 20 - Math.floor(score / 500)); 
+        if(frame % rate !== 0) return;
 
-        const side = Math.floor(Math.random() * 4);
-        let x, y;
-        if(side === 0) { x = Math.random() * canvas.width; y = -30; }
-        else if(side === 1) { x = canvas.width + 30; y = Math.random() * canvas.height; }
-        else if(side === 2) { x = Math.random() * canvas.width; y = canvas.height + 30; }
-        else { x = -30; y = Math.random() * canvas.height; }
+        let spawnCount = 1 + Math.floor(score / 1000); 
+        for(let i = 0; i < Math.min(spawnCount, 6); i++) {
+            const side = Math.floor(Math.random() * 4);
+            let x, y;
+            if(side === 0) { x = Math.random() * canvas.width; y = -40; }
+            else if(side === 1) { x = canvas.width + 40; y = Math.random() * canvas.height; }
+            else if(side === 2) { x = Math.random() * canvas.width; y = canvas.height + 40; }
+            else { x = -40; y = Math.random() * canvas.height; }
 
-        const angle = Math.atan2(player.y - y, player.x - x);
-        let typeRoll = Math.random();
-        
-        let e = { x, y, vx: Math.cos(angle), vy: Math.sin(angle), r: 16, hp: 1, color: "#f05", speed: 2 };
+            let roll = Math.random();
+            // HIZ DENGELENDİ: Skora bağlı artış (score/5000) olarak sınırlandırıldı
+            let baseSpeed = 2.4 + Math.min(1.5, score/5000); 
+            let e = { x, y, r: 16, hp: 1, color: "#f05", speed: baseSpeed };
 
-        if(score > 1500 && typeRoll > 0.7) { // YEŞİL (TANK)
-            e.color = "#0f0"; e.r = 24; e.hp = 4; e.speed = 1.3;
-        } else if(score > 500 && typeRoll > 0.4) { // SARI (HIZLI)
-            e.color = "#ff0"; e.r = 10; e.hp = 1; e.speed = 4.2;
+            if(score > 1200 && roll > 0.7) { 
+                e.color = "#0f0"; e.r = 25; e.hp = 6; e.speed = baseSpeed * 0.6;
+            } else if(score > 400 && roll > 0.4) { 
+                e.color = "#ff0"; e.r = 11; e.hp = 1; e.speed = baseSpeed * 1.8;
+            }
+            enemies.push(e);
         }
-
-        e.vx *= e.speed; e.vy *= e.speed;
-        enemies.push(e);
     }
 
     function loop() {
-        if(!gameRunning) return;
+        if(!running) return;
         frame++;
-        
-        // Sarsıntı ve Arka Plan
         ctx.setTransform(1, 0, 0, 1, (Math.random()-0.5)*shake, (Math.random()-0.5)*shake);
         if(shake > 0) shake *= 0.9;
         ctx.fillStyle = isAngry ? "#200" : "#050510";
         ctx.fillRect(-50,-50, canvas.width+100, canvas.height+100);
 
-        // --- MERGE SİSTEMİ (YENİLENMİŞ) ---
-        if(frame % 450 === 0) {
-            let p = petData[Math.floor(Math.random()*petData.length)];
-            helpers.push({ 
-                x: 50 + Math.random()*(canvas.width-100), 
-                y: 50 + Math.random()*(canvas.height-100), 
-                name: p.name, type: p.type, pulse: 0 
-            });
+        if(frame % 400 === 0) {
+            let p = petD[Math.floor(Math.random()*petD.length)];
+            helpers.push({ x: 50+Math.random()*(canvas.width-100), y: 50+Math.random()*(canvas.height-100), name: p.name, type: p.type, p: 0 });
         }
         helpers.forEach((h, hi) => {
-            h.pulse += 0.1;
-            ctx.strokeStyle = "#00d2ff";
-            ctx.lineWidth = 3;
-            ctx.beginPath(); ctx.arc(h.x, h.y, 25 + Math.sin(h.pulse)*5, 0, Math.PI*2); ctx.stroke();
-            ctx.drawImage(images[h.name], h.x-22, h.y-22, 44, 44);
-
+            h.p += 0.1;
+            ctx.strokeStyle = "#00d2ff"; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.arc(h.x, h.y, 25+Math.sin(h.p)*5, 0, Math.PI*2); ctx.stroke();
+            ctx.drawImage(imgs[h.name], h.x-22, h.y-22, 44, 44);
             if(Math.hypot(h.x-player.x, h.y-player.y) < 50) {
-                if(!activePowers.includes(h.type)) activePowers.push(h.type);
-                helpers.splice(hi, 1);
-                score += 100;
-                if(hp < saveData.hpLevel) { hp++; document.getElementById('hp-txt').innerText = "CAN: " + hp; }
-                shake = 10;
+                if(!activeP.includes(h.type)) activeP.push(h.type);
+                helpers.splice(hi, 1); score += 100; shake = 15;
+                if(hp < gameData.hpL) { hp++; document.getElementById('hp-txt').innerText = "CAN: " + hp; }
             }
         });
 
-        // Oyuncu ve Ritim
-        ctx.drawImage(images[petData[selectedIdx].name], player.x-30, player.y-30, 60, 60);
-        ctx.strokeStyle = isAngry ? "white" : "rgba(0,210,255,0.3)";
-        ctx.beginPath(); ctx.arc(player.x, player.y, 45 + Math.sin(frame*0.1)*5, 0, Math.PI*2); ctx.stroke();
+        ctx.drawImage(imgs[petD[selectedIdx].name], player.x-30, player.y-30, 60, 60);
 
-        // Ateş
-        const speedBonus = 1 - (saveData.speedLevel * 0.05);
-        if(frame % Math.floor(22 * speedBonus) === 0) {
-            activePowers.forEach(type => {
-                if(type === "cross") [[0,-7],[0,7],[7,0],[-7,0]].forEach(v => bullets.push({x:player.x,y:player.y,vx:v[0],vy:v[1],r:4,type,life:180}));
-                if(type === "pierce") bullets.push({x:player.x,y:player.y,vx:0,vy:-6,r:15,type,life:180});
-                if(type === "star") for(let a=0; a<Math.PI*2; a+=Math.PI/4) bullets.push({x:player.x,y:player.y,vx:Math.cos(a)*6,vy:Math.sin(a)*6,r:4,type,life:180});
-                if(type === "rapid") bullets.push({x:player.x,y:player.y,vx:(Math.random()-0.5)*2,vy:-10,r:3,type,life:180});
-                if(type === "spread") for(let i=0; i<3; i++) bullets.push({x:player.x,y:player.y,vx:(Math.random()-0.5)*8,vy:-8,r:4,type,life:180});
-                if(type === "boomerang") bullets.push({x:player.x,y:player.y,vx:(Math.random()-0.5)*10,vy:-7,r:6,type:"boom",life:200});
+        const spBonus = 1 - (gameData.spL * 0.07);
+        if(frame % Math.floor(18 * spBonus) === 0) {
+            activeP.forEach(t => {
+                if(t === "cross") [[0,-8],[0,8],[8,0],[-8,0]].forEach(v => bullets.push({x:player.x,y:player.y,vx:v[0],vy:v[1],r:4,t,l:180}));
+                if(t === "pierce") bullets.push({x:player.x,y:player.y,vx:0,vy:-8,r:18,t,l:180});
+                if(t === "star") for(let a=0; a<Math.PI*2; a+=Math.PI/4) bullets.push({x:player.x,y:player.y,vx:Math.cos(a)*7,vy:Math.sin(a)*7,r:4,t,l:180});
+                if(t === "rapid") bullets.push({x:player.x,y:player.y,vx:(Math.random()-0.5)*4,vy:-12,r:3,t,l:180});
+                if(t === "spread") for(let i=0; i<3; i++) bullets.push({x:player.x,y:player.y,vx:(Math.random()-0.5)*10,vy:-10,r:4,t,l:180});
+                if(t === "boomerang") bullets.push({x:player.x,y:player.y,vx:(Math.random()-0.5)*12,vy:-9,r:7,t:"bm",l:200});
             });
         }
 
-        spawnEnemy();
+        spawn();
 
-        // Mermiler ve Düşmanlar
         bullets.forEach((b, bi) => {
-            if(b.type === "boom") { b.vx += (player.x-b.x)*0.035; b.vy += (player.y-b.y)*0.035; }
+            if(b.t === "bm") { b.vx += (player.x-b.x)*0.04; b.vy += (player.y-b.y)*0.04; }
             b.x += b.vx; b.y += b.vy;
             ctx.fillStyle = isAngry ? "#ffff00" : "#00d2ff";
             ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI*2); ctx.fill();
-            if(b.life-- < 0) bullets.splice(bi, 1);
+            if(b.l-- < 0) bullets.splice(bi, 1);
         });
 
         enemies.forEach((e, ei) => {
@@ -221,40 +180,32 @@
             e.x += Math.cos(a)*e.speed; e.y += Math.sin(a)*e.speed;
             ctx.fillStyle = e.color;
             ctx.beginPath(); ctx.arc(e.x, e.y, e.r, 0, Math.PI*2); ctx.fill();
-
             bullets.forEach((b, bi) => {
                 if(Math.hypot(e.x-b.x, e.y-b.y) < e.r + b.r) {
                     e.hp--;
-                    if(b.type !== "pierce" && b.type !== "boom") bullets.splice(bi, 1);
+                    if(b.t !== "pierce" && b.t !== "bm") bullets.splice(bi, 1);
                     if(e.hp <= 0) {
                         enemies.splice(ei, 1);
-                        score += 10; angryLevel = Math.min(100, angryLevel+2.5);
+                        score += 10; angryL = Math.min(100, angryL+3.5);
                         document.getElementById('score-txt').innerText = "SKOR: " + score;
                     }
                 }
             });
-
             if(Math.hypot(e.x-player.x, e.y-player.y) < e.r + 15 && !isAngry) {
-                enemies.splice(ei, 1); hp--; shake = 15;
+                enemies.splice(ei, 1); hp--; shake = 20;
                 document.getElementById('hp-txt').innerText = "CAN: " + hp;
-                if(hp <= 0) { saveData.totalStars += Math.floor(score/10); save(); location.reload(); }
+                if(hp <= 0) { gameData.stars += Math.floor(score/10); record(); location.reload(); }
             }
         });
 
-        // Angry Mode
-        document.getElementById('angry-fill').style.height = angryLevel + "%";
-        if(angryLevel >= 100 && !isAngry) { 
-            isAngry = true; 
-            setTimeout(()=> {isAngry=false; angryLevel=0;}, 5000); 
-        }
-
+        document.getElementById('angry-fill').style.height = angryL + "%";
+        if(angryL >= 100 && !isAngry) { isAngry = true; setTimeout(()=> {isAngry=false; angryL=0;}, 5000); }
         requestAnimationFrame(loop);
     }
-
-    const move = (cx, cy) => { player.x = cx; player.y = cy; };
-    window.addEventListener('mousemove', e => move(e.clientX, e.clientY));
-    window.addEventListener('touchmove', e => { e.preventDefault(); move(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
-    updateMenuUI();
+    const m = (cx, cy) => { player.x = cx; player.y = cy; };
+    window.addEventListener('mousemove', e => m(e.clientX, e.clientY));
+    window.addEventListener('touchmove', e => { e.preventDefault(); m(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
+    refreshUI();
 </script>
 </body>
 </html>
