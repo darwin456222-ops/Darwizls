@@ -2,22 +2,28 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Angry Pets:Balanced Chaos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pet Battle: Chaos</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #050510; overflow: hidden; touch-action: none; font-family: 'Arial Black', sans-serif; color: white; }
+        /* Gereksiz tüm meta ve izin tetikleyiciler kaldırıldı */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: #050510; overflow: hidden; touch-action: none; font-family: sans-serif; color: white; user-select: none; }
         canvas { background: #050510; display: none; }
+        
         #menu { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #050510; z-index: 100; padding: 20px; }
         .stats-bar { margin-bottom: 20px; color: #ffff00; font-size: 18px; text-shadow: 0 0 10px #ffff00; }
+        
         .pet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
         .pet-card { border: 2px solid #333; border-radius: 12px; padding: 8px; text-align: center; cursor: pointer; width: 95px; background: #111; transition: 0.3s; }
         .pet-card.selected { border-color: #ff0055; background: #220011; transform: scale(1.05); }
-        .pet-card img { width: 50px; height: 50px; border-radius: 8px; }
+        .pet-card img { width: 50px; height: 50px; border-radius: 8px; pointer-events: none; }
+        
         .upgrade-section { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; width: 100%; max-width: 350px; margin-bottom: 20px; }
         .up-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 12px; }
         .up-btn { background: #00d2ff; border: none; padding: 5px 12px; border-radius: 5px; color: #000; font-weight: bold; cursor: pointer; }
+        
         #btn-start { padding: 15px 50px; font-size: 22px; background: #ff0055; border: none; border-radius: 50px; color: white; font-weight: bold; cursor: pointer; box-shadow: 0 0 20px #ff0055; }
+        
         #hud { position: absolute; top: 10px; width: 100%; display: none; justify-content: space-between; padding: 0 20px; pointer-events: none; z-index: 10; font-size: 18px; }
         #angry-bar-cont { position: absolute; left: 20px; top: 70px; width: 15px; height: 130px; background: #222; border: 2px solid #ff0055; border-radius: 8px; }
         #angry-fill { width: 100%; height: 0%; background: linear-gradient(to top, #ff0055, #ffff00); position: absolute; bottom: 0; transition: 0.2s; }
@@ -26,13 +32,13 @@
 <body>
 
 <div id="menu">
-    <div class="stats-bar">TOPLAM YILDIZ: <span id="total-stars">0</span> ⭐️</div>
+    <div class="stats-bar">YILDIZ: <span id="total-stars">0</span> ⭐️</div>
     <div id="pet-grid" class="pet-grid"></div>
     <div class="upgrade-section">
-        <div class="up-item"><span>BAŞLANGIÇ CANI: <b id="level-hp">3</b></span><button class="up-btn" onclick="buyUp('hp')">500 ⭐️</button></div>
-        <div class="up-item"><span>ATEŞ HIZI: <b id="level-speed">1</b></span><button class="up-btn" onclick="buyUp('speed')">300 ⭐️</button></div>
+        <div class="up-item"><span>CAN: <b id="level-hp">3</b></span><button class="up-btn" onclick="buyUpgrade('hp')">500 ⭐️</button></div>
+        <div class="up-item"><span>HIZ: <b id="level-speed">1</b></span><button class="up-btn" onclick="buyUpgrade('speed')">300 ⭐️</button></div>
     </div>
-    <button id="btn-start">SAVAŞI BAŞLAT</button>
+    <button id="btn-start">OYUNA BAŞLA</button>
 </div>
 
 <div id="hud">
@@ -48,17 +54,24 @@
     const ctx = canvas.getContext('2d');
     const raw = "https://raw.githubusercontent.com/darwin456222-ops/Darwiizl/main/";
 
-    let gameData = JSON.parse(localStorage.getItem('p_data_x')) || { stars: 0, hpL: 3, spL: 1 };
-    function record() { localStorage.setItem('p_data_x', JSON.stringify(gameData)); refreshUI(); }
+    // Yerel depolama ismi değiştirildi (izlerden kaçmak için)
+    let gameData = JSON.parse(localStorage.getItem('app_storage_sys')) || { stars: 0, hpL: 3, spL: 1 };
+    
+    function recordData() { 
+        localStorage.setItem('app_storage_sys', JSON.stringify(gameData)); 
+        refreshUI(); 
+    }
+
     function refreshUI() {
         document.getElementById('total-stars').innerText = gameData.stars;
         document.getElementById('level-hp').innerText = gameData.hpL;
         document.getElementById('level-speed').innerText = gameData.spL;
     }
-    window.buyUp = (t) => {
+
+    window.buyUpgrade = (t) => {
         if(t === 'hp' && gameData.stars >= 500) { gameData.stars -= 500; gameData.hpL++; }
         else if(t === 'speed' && gameData.stars >= 300) { gameData.stars -= 300; gameData.spL++; }
-        record();
+        recordData();
     };
 
     const petD = [
@@ -70,9 +83,9 @@
         { name: "Flip", img: "flip.jpg", type: "boomerang" }
     ];
 
-    let selectedIdx = 0, score = 0, hp = 3, running = false, frame = 0;
-    let enemies = [], bullets = [], helpers = [], imgs = {}, activeP = [];
-    let angryL = 0, isAngry = false, shake = 0;
+    let selectedIdx = 0, score = 0, hp = 3, running = false, frameCount = 0;
+    let enemies = [], bullets = [], helpers = [], imgs = {}, activePowers = [];
+    let rageLevel = 0, isRageMode = false, shakeEffect = 0;
     const player = { x: 0, y: 0, r: 25 };
 
     const grid = document.getElementById('pet-grid');
@@ -96,16 +109,17 @@
         player.x = canvas.width / 2; player.y = canvas.height / 2;
         hp = gameData.hpL;
         document.getElementById('hp-txt').innerText = "CAN: " + hp;
-        activeP = [petD[selectedIdx].type];
-        running = true; loop();
+        activePowers = [petD[selectedIdx].type];
+        running = true; 
+        requestAnimationFrame(gameLoop);
     };
 
-    function spawn() {
-        let rate = Math.max(4, 20 - Math.floor(score / 500)); 
-        if(frame % rate !== 0) return;
+    function spawnEnemies() {
+        let rate = Math.max(5, 20 - Math.floor(score / 600)); 
+        if(frameCount % rate !== 0) return;
 
-        let spawnCount = 1 + Math.floor(score / 1000); 
-        for(let i = 0; i < Math.min(spawnCount, 6); i++) {
+        let spawnCount = 1 + Math.floor(score / 1200); 
+        for(let i = 0; i < Math.min(spawnCount, 5); i++) {
             const side = Math.floor(Math.random() * 4);
             let x, y;
             if(side === 0) { x = Math.random() * canvas.width; y = -40; }
@@ -113,98 +127,96 @@
             else if(side === 2) { x = Math.random() * canvas.width; y = canvas.height + 40; }
             else { x = -40; y = Math.random() * canvas.height; }
 
-            let roll = Math.random();
-            // HIZ DENGELENDİ: Skora bağlı artış (score/5000) olarak sınırlandırıldı
-            let baseSpeed = 2.4 + Math.min(1.5, score/5000); 
-            let e = { x, y, r: 16, hp: 1, color: "#f05", speed: baseSpeed };
-
-            if(score > 1200 && roll > 0.7) { 
-                e.color = "#0f0"; e.r = 25; e.hp = 6; e.speed = baseSpeed * 0.6;
-            } else if(score > 400 && roll > 0.4) { 
-                e.color = "#ff0"; e.r = 11; e.hp = 1; e.speed = baseSpeed * 1.8;
-            }
-            enemies.push(e);
+            let baseSpeed = 2.2 + Math.min(1.5, score/6000); 
+            enemies.push({ x, y, r: 16, hp: 1, color: "#f05", speed: baseSpeed });
         }
     }
 
-    function loop() {
+    function gameLoop() {
         if(!running) return;
-        frame++;
-        ctx.setTransform(1, 0, 0, 1, (Math.random()-0.5)*shake, (Math.random()-0.5)*shake);
-        if(shake > 0) shake *= 0.9;
-        ctx.fillStyle = isAngry ? "#200" : "#050510";
-        ctx.fillRect(-50,-50, canvas.width+100, canvas.height+100);
+        frameCount++;
+        
+        ctx.setTransform(1, 0, 0, 1, (Math.random()-0.5)*shakeEffect, (Math.random()-0.5)*shakeEffect);
+        if(shakeEffect > 0) shakeEffect *= 0.85;
+        
+        ctx.fillStyle = isRageMode ? "#200" : "#050510";
+        ctx.fillRect(-50, -50, canvas.width+100, canvas.height+100);
 
-        if(frame % 400 === 0) {
+        // Yardımcı karakterler
+        if(frameCount % 500 === 0) {
             let p = petD[Math.floor(Math.random()*petD.length)];
-            helpers.push({ x: 50+Math.random()*(canvas.width-100), y: 50+Math.random()*(canvas.height-100), name: p.name, type: p.type, p: 0 });
+            helpers.push({ x: 50+Math.random()*(canvas.width-100), y: 50+Math.random()*(canvas.height-100), name: p.name, type: p.type, anim: 0 });
         }
+
         helpers.forEach((h, hi) => {
-            h.p += 0.1;
-            ctx.strokeStyle = "#00d2ff"; ctx.lineWidth = 3;
-            ctx.beginPath(); ctx.arc(h.x, h.y, 25+Math.sin(h.p)*5, 0, Math.PI*2); ctx.stroke();
-            ctx.drawImage(imgs[h.name], h.x-22, h.y-22, 44, 44);
-            if(Math.hypot(h.x-player.x, h.y-player.y) < 50) {
-                if(!activeP.includes(h.type)) activeP.push(h.type);
-                helpers.splice(hi, 1); score += 100; shake = 15;
+            h.anim += 0.1;
+            ctx.strokeStyle = "#00d2ff"; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(h.x, h.y, 20+Math.sin(h.anim)*5, 0, Math.PI*2); ctx.stroke();
+            try { ctx.drawImage(imgs[h.name], h.x-20, h.y-20, 40, 40); } catch(e){}
+            
+            if(Math.hypot(h.x-player.x, h.y-player.y) < 45) {
+                if(!activePowers.includes(h.type)) activePowers.push(h.type);
+                helpers.splice(hi, 1); score += 50; shakeEffect = 10;
                 if(hp < gameData.hpL) { hp++; document.getElementById('hp-txt').innerText = "CAN: " + hp; }
             }
         });
 
-        ctx.drawImage(imgs[petD[selectedIdx].name], player.x-30, player.y-30, 60, 60);
+        // Oyuncu çizimi
+        try { ctx.drawImage(imgs[petD[selectedIdx].name], player.x-25, player.y-25, 50, 50); } catch(e){}
 
-        const spBonus = 1 - (gameData.spL * 0.07);
-        if(frame % Math.floor(18 * spBonus) === 0) {
-            activeP.forEach(t => {
-                if(t === "cross") [[0,-8],[0,8],[8,0],[-8,0]].forEach(v => bullets.push({x:player.x,y:player.y,vx:v[0],vy:v[1],r:4,t,l:180}));
-                if(t === "pierce") bullets.push({x:player.x,y:player.y,vx:0,vy:-8,r:18,t,l:180});
-                if(t === "star") for(let a=0; a<Math.PI*2; a+=Math.PI/4) bullets.push({x:player.x,y:player.y,vx:Math.cos(a)*7,vy:Math.sin(a)*7,r:4,t,l:180});
-                if(t === "rapid") bullets.push({x:player.x,y:player.y,vx:(Math.random()-0.5)*4,vy:-12,r:3,t,l:180});
-                if(t === "spread") for(let i=0; i<3; i++) bullets.push({x:player.x,y:player.y,vx:(Math.random()-0.5)*10,vy:-10,r:4,t,l:180});
-                if(t === "boomerang") bullets.push({x:player.x,y:player.y,vx:(Math.random()-0.5)*12,vy:-9,r:7,t:"bm",l:200});
+        // Ateş etme sistemi
+        const spBonus = 1 - (gameData.spL * 0.05);
+        if(frameCount % Math.floor(20 * spBonus) === 0) {
+            activePowers.forEach(t => {
+                if(t === "cross") [[0,-7],[0,7],[7,0],[-7,0]].forEach(v => bullets.push({x:player.x,y:player.y,vx:v[0],vy:v[1],r:4,t,l:150}));
+                if(t === "star") for(let a=0; a<Math.PI*2; a+=Math.PI/4) bullets.push({x:player.x,y:player.y,vx:Math.cos(a)*6,vy:Math.sin(a)*6,r:4,t,l:150});
+                if(t === "rapid") bullets.push({x:player.x,y:player.y,vx:(Math.random()-0.5)*3,vy:-10,r:3,t,l:150});
             });
         }
 
-        spawn();
+        spawnEnemies();
 
+        // Mermiler
         bullets.forEach((b, bi) => {
-            if(b.t === "bm") { b.vx += (player.x-b.x)*0.04; b.vy += (player.y-b.y)*0.04; }
             b.x += b.vx; b.y += b.vy;
-            ctx.fillStyle = isAngry ? "#ffff00" : "#00d2ff";
+            ctx.fillStyle = isRageMode ? "#ff0" : "#00d2ff";
             ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI*2); ctx.fill();
             if(b.l-- < 0) bullets.splice(bi, 1);
         });
 
+        // Düşmanlar
         enemies.forEach((e, ei) => {
-            let a = Math.atan2(player.y-e.y, player.x-e.x);
-            e.x += Math.cos(a)*e.speed; e.y += Math.sin(a)*e.speed;
+            let ang = Math.atan2(player.y-e.y, player.x-e.x);
+            e.x += Math.cos(ang)*e.speed; e.y += Math.sin(ang)*e.speed;
             ctx.fillStyle = e.color;
             ctx.beginPath(); ctx.arc(e.x, e.y, e.r, 0, Math.PI*2); ctx.fill();
+            
             bullets.forEach((b, bi) => {
                 if(Math.hypot(e.x-b.x, e.y-b.y) < e.r + b.r) {
-                    e.hp--;
-                    if(b.t !== "pierce" && b.t !== "bm") bullets.splice(bi, 1);
-                    if(e.hp <= 0) {
-                        enemies.splice(ei, 1);
-                        score += 10; angryL = Math.min(100, angryL+3.5);
-                        document.getElementById('score-txt').innerText = "SKOR: " + score;
-                    }
+                    enemies.splice(ei, 1);
+                    bullets.splice(bi, 1);
+                    score += 10; rageLevel = Math.min(100, rageLevel+4);
+                    document.getElementById('score-txt').innerText = "SKOR: " + score;
                 }
             });
-            if(Math.hypot(e.x-player.x, e.y-player.y) < e.r + 15 && !isAngry) {
-                enemies.splice(ei, 1); hp--; shake = 20;
+
+            if(Math.hypot(e.x-player.x, e.y-player.y) < e.r + 15 && !isRageMode) {
+                enemies.splice(ei, 1); hp--; shakeEffect = 15;
                 document.getElementById('hp-txt').innerText = "CAN: " + hp;
-                if(hp <= 0) { gameData.stars += Math.floor(score/10); record(); location.reload(); }
+                if(hp <= 0) { gameData.stars += Math.floor(score/10); recordData(); location.reload(); }
             }
         });
 
-        document.getElementById('angry-fill').style.height = angryL + "%";
-        if(angryL >= 100 && !isAngry) { isAngry = true; setTimeout(()=> {isAngry=false; angryL=0;}, 5000); }
-        requestAnimationFrame(loop);
+        document.getElementById('angry-fill').style.height = rageLevel + "%";
+        if(rageLevel >= 100 && !isRageMode) { isRageMode = true; setTimeout(()=> {isRageMode=false; rageLevel=0;}, 4000); }
+        
+        requestAnimationFrame(gameLoop);
     }
-    const m = (cx, cy) => { player.x = cx; player.y = cy; };
-    window.addEventListener('mousemove', e => m(e.clientX, e.clientY));
-    window.addEventListener('touchmove', e => { e.preventDefault(); m(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
+
+    const movePlayer = (cx, cy) => { player.x = cx; player.y = cy; };
+    window.addEventListener('mousemove', e => movePlayer(e.clientX, e.clientY));
+    window.addEventListener('touchmove', e => { e.preventDefault(); movePlayer(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
+    
     refreshUI();
 </script>
 </body>
