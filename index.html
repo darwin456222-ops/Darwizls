@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
-    <title>Food Gang: Kolay Yönetilebilir Obje Sistemi</title>
+    <title>Food Gang: Gelişmiş Fizikli Savaş Motoru</title>
     
-    <!-- Firebase Kütüphaneleri -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -67,66 +66,34 @@
         .btn-sub { font-size: 10px; opacity: 0.8; margin-top: 2px; }
 
         /* -----------------------------------------
-           🖼️ KARAKTER SEÇİM PANELİ (ÇİZİM ŞABLONU UYUMLU)
+           🖼️ KARAKTER SEÇİM PANELİ
         ----------------------------------------- */
         .char-panel-window {
             width: 95%; height: 90%; background: #0b0c10; border-radius: 12px;
             padding: 15px; display: grid; grid-template-columns: 32% 28% 40%;
             grid-template-rows: 73% 27%; gap: 15px; position: relative;
         }
-
-        /* Sol Üst - Yeşil Kutu: Karakter Görseli */
-        .char-layout-green {
-            grid-column: 1; grid-row: 1;
-            border: 5px solid #7be324; border-radius: 12px; background: #12131c;
-            display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 10px; position: relative;
-        }
+        .char-layout-green { grid-column: 1; grid-row: 1; border: 5px solid #7be324; border-radius: 12px; background: #12131c; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 10px; position: relative; }
         .char-layout-green img { width: 75%; height: 75%; object-fit: contain; }
         .char-layout-green .label-name { position: absolute; bottom: 10px; font-size: 22px; font-weight: 900; letter-spacing: 2px; color: #7be324; }
-
-        /* Sol Alt - Mavi Kutu: Seçim Butonu */
-        .char-layout-blue {
-            grid-column: 1; grid-row: 2;
-            border: 5px solid #00bfff; border-radius: 12px; background: #12131c;
-            display: flex; justify-content: center; align-items: center; padding: 5px;
-        }
-        .select-action-btn {
-            width: 100%; height: 100%; border: none; background: #00bfff; color: #12131c;
-            font-size: 20px; font-weight: 900; border-radius: 6px; cursor: pointer; transition: 0.1s;
-        }
+        .char-layout-blue { grid-column: 1; grid-row: 2; border: 5px solid #00bfff; border-radius: 12px; background: #12131c; display: flex; justify-content: center; align-items: center; padding: 5px; }
+        .select-action-btn { width: 100%; height: 100%; border: none; background: #00bfff; color: #12131c; font-size: 20px; font-weight: 900; border-radius: 6px; cursor: pointer; transition: 0.1s; }
         .select-action-btn:active { transform: scale(0.97); }
         .select-action-btn.current { background: #1a2630; color: #00bfff; border: 2px solid #00bfff; cursor: default; }
-
-        /* Orta - Pembe Kutu: İstatistikler */
-        .char-layout-pink {
-            grid-column: 2; grid-row: 1 / span 2;
-            border: 5px solid #ff007f; border-radius: 12px; background: #12131c;
-            display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: 25px; gap: 25px;
-        }
+        .char-layout-pink { grid-column: 2; grid-row: 1 / span 2; border: 5px solid #ff007f; border-radius: 12px; background: #12131c; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: 25px; gap: 25px; }
         .stat-group { width: 100%; }
         .stat-label { font-size: 16px; font-weight: bold; color: #ff007f; margin-bottom: 8px; text-transform: uppercase; display: flex; justify-content: space-between; }
         .stat-bar-bg { width: 100%; height: 16px; background: #222; border-radius: 8px; border: 1px solid #ff007f; overflow: hidden; }
         .stat-bar-fill { height: 100%; background: linear-gradient(90deg, #ff007f, #ff66b2); width: 0%; transition: width 0.3s ease-in-out; }
-
-        /* Sağ - Turuncu Kutu: 9 Karakterli Kaydırılabilir Liste */
-        .char-layout-orange {
-            grid-column: 3; grid-row: 1 / span 2;
-            border: 5px solid #ff8800; border-radius: 12px; background: #12131c;
-            padding: 15px; display: flex; flex-direction: column; position: relative;
-        }
+        .char-layout-orange { grid-column: 3; grid-row: 1 / span 2; border: 5px solid #ff8800; border-radius: 12px; background: #12131c; padding: 15px; display: flex; flex-direction: column; position: relative; }
         .orange-grid-title { font-size: 18px; font-weight: bold; color: #ff8800; text-align: center; margin-bottom: 12px; text-transform: uppercase; border-bottom: 1px solid rgba(255,136,0,0.2); padding-bottom: 5px; }
         .char-grid-scroll { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding-right: 5px; }
-        
-        .grid-char-card {
-            background: #1a1b26; border: 2px solid #333; border-radius: 8px; padding: 8px;
-            display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.1s;
-        }
+        .grid-char-card { background: #1a1b26; border: 2px solid #333; border-radius: 8px; padding: 8px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.1s; }
         .grid-char-card.selected-preview { border-color: #ff8800; background: rgba(255,136,0,0.08); }
         .grid-char-card img { width: 40px; height: 40px; object-fit: contain; background: #111; border-radius: 6px; }
         .grid-char-info { display: flex; flex-direction: column; }
         .grid-char-name { font-size: 13px; font-weight: bold; }
         .grid-char-level { font-size: 10px; color: #888; margin-top: 2px; }
-
         .panel-floating-close { position: absolute; top: -10px; right: -10px; width: 36px; height: 36px; border-radius: 50%; background: #ff0055; border: 2px solid white; color: white; font-size: 18px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; z-index: 110; }
 
         /* Ortak Modallar */
@@ -135,7 +102,6 @@
         .panel-title { font-size: 24px; font-weight: bold; color: #ffaa00; text-align: center; border-bottom: 2px solid rgba(255,170,0,0.2); padding-bottom: 10px; }
         .close-btn { position: absolute; top: 15px; right: 20px; background: none; border: none; color: #ff0055; font-size: 26px; cursor: pointer; font-weight: bold; }
         .panel-content { flex: 1; margin-top: 15px; overflow-y: auto; display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; align-items: center; }
-
         .match-box { background: white; color: black; padding: 30px; border-radius: 15px; text-align: center; width: 360px; }
         .match-box h3 { font-size: 22px; margin-bottom: 10px; color: #161724; }
         .match-box p { color: #666; font-size: 14px; margin-bottom: 20px; }
@@ -152,7 +118,6 @@
 </head>
 <body>
 
-<!-- 1. ANA LOBİ EKRANI -->
 <div id="main-menu">
     <div class="green-box">
         <button class="green-btn" onclick="openPanel('panel-characters')">KARAKTERLER</button>
@@ -193,23 +158,16 @@
     </div>
 </div>
 
-<!-- 2. SAVAŞÇI SEÇİM PANELİ -->
 <div id="panel-characters" class="overlay-panel">
     <div class="char-panel-window">
         <button class="panel-floating-close" onclick="closePanel('panel-characters')">✕</button>
-        
-        <!-- Sol Üst: Yeşil Kutu (Görsel) -->
         <div class="char-layout-green">
             <img id="preview-img" src="gus.png" onerror="this.src='https://via.placeholder.com/180/00d2ff/ffffff?text=FOOD'">
             <div class="label-name" id="preview-name">GUS</div>
         </div>
-
-        <!-- Sol Alt: Mavi Kutu (Seçme Butonu) -->
         <div class="char-layout-blue">
             <button id="preview-select-btn" class="select-action-btn" onclick="onaylananKarakteriDegistir()">SEÇİLİ</button>
         </div>
-
-        <!-- Orta: Pembe Kutu (Can ve Hasar) -->
         <div class="char-layout-pink">
             <div class="stat-group">
                 <div class="stat-label"><span>CAN (HP)</span><span id="stat-val-hp">800</span></div>
@@ -220,18 +178,13 @@
                 <div class="stat-bar-bg"><div id="stat-bar-atk" class="stat-bar-fill"></div></div>
             </div>
         </div>
-
-        <!-- Sağ: Turuncu Kutu (Karakter Listesi) -->
         <div class="char-layout-orange">
             <div class="orange-grid-title">Karakterler</div>
-            <div class="char-grid-scroll" id="orange-list-container">
-                <!-- 9 Karakter Dinamik Olarak Buraya Gelecek -->
-            </div>
+            <div class="char-grid-scroll" id="orange-list-container"></div>
         </div>
     </div>
 </div>
 
-<!-- SAVAŞ SAHNESİ (CANVAS) -->
 <div id="game-stage">
     <div class="game-ui">
         <div><span id="ui-my-name">Darwizl</span> (Sen)<div class="hp-bar-container"><div id="my-hp-fill" class="hp-fill"></div></div></div>
@@ -241,7 +194,6 @@
     <canvas id="battleCanvas"></canvas>
 </div>
 
-<!-- Genel Diğer Modallar -->
 <div id="panel-friends" class="overlay-panel"><div class="panel-window"><button class="close-btn" onclick="closePanel('panel-friends')">✕</button><div class="panel-title">Arkadaşlar</div><div class="panel-content"><p style="color: #aaa;">Çevrimiçi arkadaş bulunmuyor.</p></div></div></div>
 <div id="panel-trophy" class="overlay-panel"><div class="panel-window"><button class="close-btn" onclick="closePanel('panel-trophy')">✕</button><div class="panel-title">Kupa Yolu</div><div class="panel-content"><div style="background:#24263e; padding:20px; border-radius:12px; border:2px solid #00d2ff; text-align:center;"><h3>🏆 2000 Kupa Hedefi</h3><p style="color: #ffaa00; margin-top:10px;">Büyük Ödül: Efsanevi Paket!</p></div></div></div></div>
 <div id="panel-shop" class="overlay-panel"><div class="panel-window"><button class="close-btn" onclick="closePanel('panel-shop')">✕</button><div class="panel-title">Yemek Dükkanı</div><div class="panel-content"><div style="background:#2b1f30; padding:20px; border-radius:12px; border:2px solid #e6005c; text-align:center;"><h3>Mühimmat Takviyesi</h3><p style="color: #ffd700; margin-top:5px;">🪙 2500 Altın Paketi</p></div></div></div></div>
@@ -258,7 +210,6 @@
     let mevcutOdaId = null;
     let isHardcore = false;
 
-    // 💡 İSTEDİĞİN GİBİ: Anahtar tabanlı nesne (object) yapısına geçiş yapıldı
     const characters = {
         gus:    { name: "GUS",    src: "gus.png",    color: "#00d2ff", hp: 800, atk: 100 },
         flip:   { name: "FLIP",   src: "flip.png",   color: "#a83232", hp: 750, atk: 50  },
@@ -271,13 +222,17 @@
         blinky: { name: "BLINKY", src: "blinky.png", color: "#e3e0a0", hp: 400, atk: 60  }
     };
     
-    // UI İlerleme çubuğu limitleri
     const MAX_HP_LIMIT = 900;
     const MAX_ATK_LIMIT = 140;
-
-    // Başlangıç karakter kimliklerini (ID) tutuyoruz
     let aktifKarakterId = "gus";        
     let onizlemeKarakterId = "gus";    
+
+    // Karakter Resimlerini Önden Yükle (Canvas Çizimi İçin)
+    const loadedImages = {};
+    Object.keys(characters).forEach(id => {
+        loadedImages[id] = new Image();
+        loadedImages[id].src = characters[id].src;
+    });
 
     function openPanel(id) {
         document.getElementById(id).style.display = 'flex';
@@ -289,12 +244,9 @@
         document.getElementById('hardcore-toggle').classList.toggle('selected', isHardcore);
     }
 
-    // Obje yapısı üzerinden döngü kurarak 9 karakter kartını basıyoruz
     function karakterEkraniniOlustur() {
         const container = document.getElementById('orange-list-container');
         container.innerHTML = "";
-
-        // Object.keys kullanarak nesnenin anahtarlarını çekiyoruz (gus, flip, blook...)
         Object.keys(characters).forEach(id => {
             const char = characters[id];
             const card = document.createElement('div');
@@ -313,28 +265,20 @@
             };
             container.appendChild(card);
         });
-
         karakterDetaylariniYenile();
     }
 
     function karakterDetaylariniYenile() {
         const char = characters[onizlemeKarakterId];
-
-        // Yeşil Kutu
         document.getElementById('preview-img').src = char.src;
         document.getElementById('preview-name').innerText = char.name;
         document.getElementById('preview-name').style.color = char.color;
-
-        // Pembe Kutu (İstatistik Çubukları)
         document.getElementById('stat-val-hp').innerText = char.hp;
         document.getElementById('stat-val-atk').innerText = char.atk;
         
-        let hpYuzde = (char.hp / MAX_HP_LIMIT) * 100;
-        let atkYuzde = (char.atk / MAX_ATK_LIMIT) * 100;
-        document.getElementById('stat-bar-hp').style.width = hpYuzde + "%";
-        document.getElementById('stat-bar-atk').style.width = atkYuzde + "%";
+        document.getElementById('stat-bar-hp').style.width = (char.hp / MAX_HP_LIMIT) * 100 + "%";
+        document.getElementById('stat-bar-atk').style.width = (char.atk / MAX_ATK_LIMIT) * 100 + "%";
 
-        // Mavi Kutu (Buton Durumu)
         const btn = document.getElementById('preview-select-btn');
         if (onizlemeKarakterId === aktifKarakterId) {
             btn.innerText = "SEÇİLİ";
@@ -348,24 +292,20 @@
     function onaylananKarakteriDegistir() {
         if (onizlemeKarakterId === aktifKarakterId) return;
         aktifKarakterId = onizlemeKarakterId;
-        
         const char = characters[aktifKarakterId];
         document.getElementById('main-char-name').innerText = char.name;
         document.getElementById('main-char-img').src = char.src;
         document.getElementById('profile-avatar').src = char.src;
-        
-        karakterDetaylariniYenile();
         closePanel('panel-characters');
     }
 
     // -----------------------------------------
-    // ANLIK ÇEVRİMİÇİ MULTIPLAYER MATCHMAKING
+    // MATCHMAKING ALTYAPISI
     // -----------------------------------------
     function eslesmeBaslat(mod) {
         seciliMod = mod;
         document.getElementById('panel-matchmaking').style.display = 'flex';
         document.getElementById('match-status-title').innerText = `${mod.toUpperCase()} ARANIYOR...`;
-
         const poolRef = database.ref('match_pools/' + mod);
 
         poolRef.once('value', (snapshot) => {
@@ -378,7 +318,8 @@
                     mod: seciliMod, hardcore: isHardcore, status: "ready",
                     p1_name: rooms[roomId].player, p1_char: rooms[roomId].char,
                     p2_name: oyuncuAdi, p2_char: aktifKarakterId,
-                    p1_x: 200, p1_y: 300, p2_x: 600, p2_y: 300
+                    p1_x: 150, p1_y: 400, p1_dir: 1,
+                    p2_x: 650, p2_y: 400, p2_dir: -1
                 }).then(() => {
                     poolRef.child(roomId).remove();
                     savasSahnesiniYukle(roomId, "player2");
@@ -386,7 +327,6 @@
             } else {
                 const newRoomRef = poolRef.push();
                 mevcutOdaId = newRoomRef.key;
-
                 newRoomRef.set({ player: oyuncuAdi, char: aktifKarakterId, time: firebase.database.ServerValue.TIMESTAMP });
 
                 database.ref('live_arenas/' + mevcutOdaId).on('value', (gameSnapshot) => {
@@ -408,18 +348,37 @@
     }
 
     // -----------------------------------------
-    // SAVAŞ ALANI MOTORU (CANVAS)
+    // GELİŞMİŞ FİZİKLİ 2D SAVAŞ MOTORU (CANVAS)
     // -----------------------------------------
     const canvas = document.getElementById("battleCanvas");
     const ctx = canvas.getContext("2d");
     let gameInterval, syncInterval, myRole = "", roomDataRef = null;
     
-    let gameState = { p1_x: 200, p1_y: 300, p1_hp: 100, p2_x: 600, p2_y: 300, p2_hp: 100, bullets: [] };
-    let keys = {};
+    // Gelişmiş Fizik State Değerleri
+    let gameState = {
+        p1_x: 150, p1_y: 400, p1_vy: 0, p1_dir: 1, p1_hp: 100, p1_char: "gus",
+        p2_x: 650, p2_y: 400, p2_vy: 0, p2_dir: -1, p2_hp: 100, p2_char: "gus",
+        bullets: []
+    };
+    
+    // Sabit Çevre Verileri
+    const GRAVITY = 0.5;
+    const JUMP_FORCE = -12;
+    const GROUND_Y = 450; // Karakterlerin basacağı yer çizgisi tabanı
+    const CHAR_RADIUS = 35; // Vurulma alanı genişliği
 
-    window.addEventListener("keydown", e => keys[e.code] = true);
+    let keys = {};
+    window.addEventListener("keydown", e => {
+        keys[e.code] = true;
+        // Zıplama Tetikleyicisi (Yerdeyken W veya Üst Ok)
+        if (e.code === "KeyW" || e.code === "ArrowUp") {
+            if (myRole === "player1" && gameState.p1_y >= GROUND_Y) gameState.p1_vy = JUMP_FORCE;
+            if (myRole === "player2" && gameState.p2_y >= GROUND_Y) gameState.p2_vy = JUMP_FORCE;
+        }
+        // Boşluk Tuşu ile Ateş Etme
+        if (e.code === "Space") mermiAtesle();
+    });
     window.addEventListener("keyup", e => keys[e.code] = false);
-    window.addEventListener("keypress", e => { if (e.code === "Space") mermiAtesle(); });
 
     function savasSahnesiniYukle(roomId, role) {
         myRole = role;
@@ -436,16 +395,34 @@
             const data = snap.val();
             document.getElementById("ui-my-name").innerText = role === "player1" ? data.p1_name : data.p2_name;
             document.getElementById("ui-enemy-name").innerText = role === "player1" ? data.p2_name : data.p1_name;
+            gameState.p1_char = data.p1_char;
+            gameState.p2_char = data.p2_char;
         });
 
+        // Veritabanı Değişim Dinleyicisi
         roomDataRef.on('value', snap => {
             if (!snap.exists()) return;
             const data = snap.val();
-            if (myRole === "player2") { gameState.p1_x = data.p1_x; gameState.p1_y = data.p1_y; }
-            else { gameState.p2_x = data.p2_x; gameState.p2_y = data.p2_y; }
             
+            // Karşı oyuncunun hareket verilerini eşitle
+            if (myRole === "player2") {
+                gameState.p1_x = data.p1_x;
+                gameState.p1_y = data.p1_y;
+                gameState.p1_dir = data.p1_dir;
+            } else {
+                gameState.p2_x = data.p2_x;
+                gameState.p2_y = data.p2_y;
+                gameState.p2_dir = data.p2_dir;
+            }
+            
+            // Karşıdan gelen mermiyi yakala
             if (data.remote_bullet && data.sender !== myRole) {
-                gameState.bullets.push({ x: data.remote_bullet.x, y: data.remote_bullet.y, dx: data.remote_bullet.dx, owner: "enemy" });
+                gameState.bullets.push({
+                    x: data.remote_bullet.x,
+                    y: data.remote_bullet.y,
+                    dx: data.remote_bullet.dx,
+                    owner: "enemy"
+                });
                 roomDataRef.child("remote_bullet").remove();
             }
         });
@@ -455,9 +432,11 @@
     }
 
     function mermiAtesle() {
-        let bx = myRole === "player1" ? gameState.p1_x : gameState.p2_x;
-        let by = myRole === "player1" ? gameState.p1_y : gameState.p2_y;
-        let bdx = myRole === "player1" ? 9 : -9;
+        let isP1 = (myRole === "player1");
+        let bx = isP1 ? gameState.p1_x : gameState.p2_x;
+        let by = isP1 ? gameState.p1_y - 10 : gameState.p2_y - 10; // Silah hizası yüksekliği
+        let bDir = isP1 ? gameState.p1_dir : gameState.p2_dir;
+        let bdx = bDir * 12; // Baktığı yöne doğru hız vektörü
 
         gameState.bullets.push({ x: bx, y: by, dx: bdx, owner: "me" });
         roomDataRef.child("remote_bullet").set({ x: bx, y: by, dx: bdx });
@@ -466,44 +445,96 @@
 
     function gameUpdate() {
         let speed = 6;
+
+        // Player 1 Fizik ve Girdileri
         if (myRole === "player1") {
-            if (keys["KeyA"] || keys["ArrowLeft"]) gameState.p1_x -= speed;
-            if (keys["KeyD"] || keys["ArrowRight"]) gameState.p1_x += speed;
-            if (keys["KeyW"] || keys["ArrowUp"]) gameState.p1_y -= speed;
-            if (keys["KeyS"] || keys["ArrowDown"]) gameState.p1_y += speed;
-        } else {
-            if (keys["KeyA"] || keys["ArrowLeft"]) gameState.p2_x -= speed;
-            if (keys["KeyD"] || keys["ArrowRight"]) gameState.p2_x += speed;
-            if (keys["KeyW"] || keys["ArrowUp"]) gameState.p2_y -= speed;
-            if (keys["KeyS"] || keys["ArrowDown"]) gameState.p2_y += speed;
+            if (keys["KeyA"] || keys["ArrowLeft"]) { gameState.p1_x -= speed; gameState.p1_dir = -1; }
+            if (keys["KeyD"] || keys["ArrowRight"]) { gameState.p1_x += speed; gameState.p1_dir = 1; }
+            
+            gameState.p1_vy += GRAVITY;
+            gameState.p1_y += gameState.p1_vy;
+            if (gameState.p1_y >= GROUND_Y) { gameState.p1_y = GROUND_Y; gameState.p1_vy = 0; }
+        } 
+        // Player 2 Fizik ve Girdileri
+        else {
+            if (keys["KeyA"] || keys["ArrowLeft"]) { gameState.p2_x -= speed; gameState.p2_dir = -1; }
+            if (keys["KeyD"] || keys["ArrowRight"]) { gameState.p2_x += speed; gameState.p2_dir = 1; }
+            
+            gameState.p2_vy += GRAVITY;
+            gameState.p2_y += gameState.p2_vy;
+            if (gameState.p2_y >= GROUND_Y) { gameState.p2_y = GROUND_Y; gameState.p2_vy = 0; }
         }
 
+        // --- CANVAS ÇİZİM AŞAMASI ---
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // P1 Çizimi
-        ctx.fillStyle = "#00d2ff";
-        ctx.beginPath(); ctx.arc(gameState.p1_x, gameState.p1_y, 30, 0, Math.PI*2); ctx.fill();
+        // Arka Plan Çizgisi (Zemin)
+        ctx.strokeStyle = "#4E9F3D";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(0, GROUND_Y + CHAR_RADIUS);
+        ctx.lineTo(canvas.width, GROUND_Y + CHAR_RADIUS);
+        ctx.stroke();
 
-        // P2 Çizimi
-        ctx.fillStyle = "#ff0055";
-        ctx.beginPath(); ctx.arc(gameState.p2_x, gameState.p2_y, 30, 0, Math.PI*2); ctx.fill();
+        // 1. OYUNCU ÇİZİMİ (Sağa/Sola Döndürülebilir Görsel)
+        drawCharacter(gameState.p1_x, gameState.p1_y, gameState.p1_char, gameState.p1_dir, "#00d2ff");
 
-        // Mermiler
+        // 2. OYUNCU ÇİZİMİ (Sağa/Sola Döndürülebilir Görsel)
+        drawCharacter(gameState.p2_x, gameState.p2_y, gameState.p2_char, gameState.p2_dir, "#ff0055");
+
+        // MERMİLERİN HAREKETİ VE HITBOX KONTROLÜ
         gameState.bullets.forEach((b, idx) => {
             b.x += b.dx;
+            
+            // Parlayan mermi efekti
             ctx.fillStyle = b.owner === "me" ? "#ffd700" : "#ff3333";
-            ctx.beginPath(); ctx.arc(b.x, b.y, 6, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); 
+            ctx.arc(b.x, b.y, 6, 0, Math.PI * 2); 
+            ctx.fill();
 
+            // Mermi bana aitse rakibe çarpıp çarpmadığını kontrol et
             if (b.owner === "me") {
                 let tx = myRole === "player1" ? gameState.p2_x : gameState.p1_x;
                 let ty = myRole === "player1" ? gameState.p2_y : gameState.p1_y;
-                if (Math.hypot(b.x - tx, b.y - ty) < 30) {
+                
+                // İki nokta arası mesafe formülü ile hitbox doğrulaması
+                if (Math.hypot(b.x - tx, b.y - ty) < CHAR_RADIUS) {
                     gameState.bullets.splice(idx, 1);
                     hitRegistered();
                 }
             }
+            
+            // Ekran dışına çıkan mermileri bellekten temizle
             if (b.x < 0 || b.x > canvas.width) gameState.bullets.splice(idx, 1);
         });
+    }
+
+    // Karakterleri baktığı yöne (X ekseninde scale) göre çizen fonksiyon
+    function drawCharacter(x, y, charId, direction, strokeColor) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(direction, 1); // 1 ise normal, -1 ise resmi yatayda tam tersine katlar (Flip)
+
+        const img = loadedImages[charId];
+        if (img && img.complete && img.naturalWidth !== 0) {
+            // Görsel yüklendiyse merkezcil olarak çiz
+            ctx.drawImage(img, -CHAR_RADIUS, -CHAR_RADIUS, CHAR_RADIUS * 2, CHAR_RADIUS * 2);
+        } else {
+            // Görsel gelmediyse geçici yuvarlak şablon bas
+            ctx.fillStyle = strokeColor;
+            ctx.beginPath();
+            ctx.arc(0, 0, CHAR_RADIUS, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Seçim halkası tabanı
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(0, 0, CHAR_RADIUS, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.restore();
     }
 
     function hitRegistered() {
@@ -512,7 +543,8 @@
         document.getElementById("enemy-hp-fill").style.width = (myRole === "player1" ? gameState.p2_hp : gameState.p1_hp) + "%";
         
         if(gameState.p1_hp <= 0 || gameState.p2_hp <= 0) {
-            clearInterval(gameInterval); clearInterval(syncInterval);
+            clearInterval(gameInterval); 
+            clearInterval(syncInterval);
             alert("Savaş Bitti!");
             location.reload();
         }
@@ -523,9 +555,11 @@
         if (myRole === "player1") {
             roomDataRef.child("p1_x").set(gameState.p1_x);
             roomDataRef.child("p1_y").set(gameState.p1_y);
+            roomDataRef.child("p1_dir").set(gameState.p1_dir);
         } else {
             roomDataRef.child("p2_x").set(gameState.p2_x);
             roomDataRef.child("p2_y").set(gameState.p2_y);
+            roomDataRef.child("p2_dir").set(gameState.p2_dir);
         }
     }
 </script>
