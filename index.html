@@ -2,566 +2,385 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
-    <title>Food Gang: Gelişmiş Fizikli Savaş Motoru</title>
-    
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Pets: Multiplayer Arena V3 - New Squad</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: #0b0c10; overflow: hidden; font-family: 'Segoe UI', Arial, sans-serif; color: white; user-select: none; width: 100vw; height: 100vh; touch-action: none; }
-        
-        /* -----------------------------------------
-           LOBİ EKRANI (MAIN MENU)
-        ----------------------------------------- */
-        #main-menu {
-            display: flex; width: 100%; height: 100%; padding: 20px;
-            justify-content: space-between; align-items: center; position: absolute; top:0; left:0;
-            background: radial-gradient(circle, #1a1c2e 0%, #0f101b 100%);
-            z-index: 10;
-        }
-        .green-box {
-            width: 22%; height: 90%; border: 4px solid #4E9F3D; border-radius: 16px;
-            background: rgba(15, 16, 27, 0.9); display: flex; flex-direction: column; justify-content: space-around; align-items: center; padding: 15px;
-        }
-        .green-btn {
-            width: 90%; padding: 15px; font-size: 16px; font-weight: bold; color: white;
-            background: #1e2235; border: 2px solid #4E9F3D; border-radius: 12px; cursor: pointer; text-align: center;
-        }
-        .green-btn:active { transform: scale(0.95); background: #4E9F3D; }
-
-        .blue-circle-container {
-            width: 42%; aspect-ratio: 1 / 1; max-height: 85vh; border: 6px solid #00d2ff; border-radius: 50%;
-            background: radial-gradient(circle, rgba(0, 210, 255, 0.15) 0%, rgba(15, 16, 27, 0.9) 80%);
-            display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative;
-        }
-        .character-trophy { position: absolute; top: 15%; background: rgba(0, 0, 0, 0.6); border: 2px solid #ffaa00; padding: 4px 14px; border-radius: 20px; font-size: 18px; font-weight: bold; color: #ffaa00; }
-        .selected-avatar-img { width: 55%; height: 55%; object-fit: contain; }
-        .char-name-txt { position: absolute; bottom: 12%; font-size: 24px; font-weight: bold; color: #fff; text-shadow: 0 2px 8px #00d2ff; text-transform: uppercase; }
-
-        .orange-box {
-            width: 28%; height: 90%; border: 4px solid #ffaa00; border-radius: 16px;
-            background: rgba(15, 16, 27, 0.9); display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 12px;
-        }
-        .orange-top { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        .gold-display { align-self: flex-start; color: #ffd700; font-weight: bold; font-size: 18px; display: flex; align-items: center; gap: 5px; }
-        
-        .player-profile { display: flex; align-items: center; gap: 10px; background: rgba(255, 170, 0, 0.1); border: 1px solid rgba(255, 170, 0, 0.3); width: 100%; padding: 8px; border-radius: 12px; }
-        .profile-avatar-img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #ffaa00; background: #1c1d30; object-fit: contain; }
-        .profile-info { display: flex; flex-direction: column; align-items: flex-start; }
-        .player-name { font-size: 16px; font-weight: bold; color: #fff; }
-        .player-total-trophies { font-size: 13px; color: #ffaa00; font-weight: bold; }
-        
-        .hardcore-box { width: 100%; height: 20%; border: 3px solid #1e831e; border-radius: 12px; background: #0f3d0f; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; }
-        .hardcore-box.selected { background: #1e831e; border-color: #4ef04e; box-shadow: 0 0 10px #4ef04e; }
-        .hardcore-title { font-size: 18px; font-weight: 900; color: #4ef04e; }
-        .hardcore-box.selected .hardcore-title { color: white; }
-        .hardcore-desc { font-size: 10px; color: #ccc; margin-top: 2px; text-align: center; padding: 0 5px; }
-
-        .orange-bottom { width: 100%; height: 52%; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-        .play-btn { width: 100%; height: 100%; border: none; border-radius: 12px; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: bold; color: white; background: linear-gradient(135deg, #e6005c, #99003d); border-bottom: 4px solid #730029; }
-        .play-btn:active { transform: scale(0.96); }
-        .btn-title { font-size: 16px; font-weight: 900; text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
-        .btn-sub { font-size: 10px; opacity: 0.8; margin-top: 2px; }
-
-        /* -----------------------------------------
-           🖼️ KARAKTER SEÇİM PANELİ
-        ----------------------------------------- */
-        .char-panel-window {
-            width: 95%; height: 90%; background: #0b0c10; border-radius: 12px;
-            padding: 15px; display: grid; grid-template-columns: 32% 28% 40%;
-            grid-template-rows: 73% 27%; gap: 15px; position: relative;
-        }
-        .char-layout-green { grid-column: 1; grid-row: 1; border: 5px solid #7be324; border-radius: 12px; background: #12131c; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 10px; position: relative; }
-        .char-layout-green img { width: 75%; height: 75%; object-fit: contain; }
-        .char-layout-green .label-name { position: absolute; bottom: 10px; font-size: 22px; font-weight: 900; letter-spacing: 2px; color: #7be324; }
-        .char-layout-blue { grid-column: 1; grid-row: 2; border: 5px solid #00bfff; border-radius: 12px; background: #12131c; display: flex; justify-content: center; align-items: center; padding: 5px; }
-        .select-action-btn { width: 100%; height: 100%; border: none; background: #00bfff; color: #12131c; font-size: 20px; font-weight: 900; border-radius: 6px; cursor: pointer; transition: 0.1s; }
-        .select-action-btn:active { transform: scale(0.97); }
-        .select-action-btn.current { background: #1a2630; color: #00bfff; border: 2px solid #00bfff; cursor: default; }
-        .char-layout-pink { grid-column: 2; grid-row: 1 / span 2; border: 5px solid #ff007f; border-radius: 12px; background: #12131c; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: 25px; gap: 25px; }
-        .stat-group { width: 100%; }
-        .stat-label { font-size: 16px; font-weight: bold; color: #ff007f; margin-bottom: 8px; text-transform: uppercase; display: flex; justify-content: space-between; }
-        .stat-bar-bg { width: 100%; height: 16px; background: #222; border-radius: 8px; border: 1px solid #ff007f; overflow: hidden; }
-        .stat-bar-fill { height: 100%; background: linear-gradient(90deg, #ff007f, #ff66b2); width: 0%; transition: width 0.3s ease-in-out; }
-        .char-layout-orange { grid-column: 3; grid-row: 1 / span 2; border: 5px solid #ff8800; border-radius: 12px; background: #12131c; padding: 15px; display: flex; flex-direction: column; position: relative; }
-        .orange-grid-title { font-size: 18px; font-weight: bold; color: #ff8800; text-align: center; margin-bottom: 12px; text-transform: uppercase; border-bottom: 1px solid rgba(255,136,0,0.2); padding-bottom: 5px; }
-        .char-grid-scroll { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding-right: 5px; }
-        .grid-char-card { background: #1a1b26; border: 2px solid #333; border-radius: 8px; padding: 8px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.1s; }
-        .grid-char-card.selected-preview { border-color: #ff8800; background: rgba(255,136,0,0.08); }
-        .grid-char-card img { width: 40px; height: 40px; object-fit: contain; background: #111; border-radius: 6px; }
-        .grid-char-info { display: flex; flex-direction: column; }
-        .grid-char-name { font-size: 13px; font-weight: bold; }
-        .grid-char-level { font-size: 10px; color: #888; margin-top: 2px; }
-        .panel-floating-close { position: absolute; top: -10px; right: -10px; width: 36px; height: 36px; border-radius: 50%; background: #ff0055; border: 2px solid white; color: white; font-size: 18px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; z-index: 110; }
-
-        /* Ortak Modallar */
-        .overlay-panel { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); z-index: 100; justify-content: center; align-items: center; }
-        .panel-window { width: 70%; height: 75%; background: #161724; border: 4px solid #ffaa00; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; position: relative; }
-        .panel-title { font-size: 24px; font-weight: bold; color: #ffaa00; text-align: center; border-bottom: 2px solid rgba(255,170,0,0.2); padding-bottom: 10px; }
-        .close-btn { position: absolute; top: 15px; right: 20px; background: none; border: none; color: #ff0055; font-size: 26px; cursor: pointer; font-weight: bold; }
-        .panel-content { flex: 1; margin-top: 15px; overflow-y: auto; display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; align-items: center; }
-        .match-box { background: white; color: black; padding: 30px; border-radius: 15px; text-align: center; width: 360px; }
-        .match-box h3 { font-size: 22px; margin-bottom: 10px; color: #161724; }
-        .match-box p { color: #666; font-size: 14px; margin-bottom: 20px; }
-        .match-box button { padding: 12px 25px; background: #ff0055; border: none; color: white; font-weight: bold; border-radius: 6px; cursor: pointer; }
-
-        /* SAVAŞ MOTORU CANVAS */
-        #game-stage { display: none; width: 100vw; height: 100vh; position: absolute; top:0; left:0; z-index: 5; background: #14151f; }
-        #battleCanvas { width: 100%; height: 100%; display: block; }
-        .game-ui { position: absolute; top: 15px; left: 0; width: 100%; display: flex; justify-content: space-around; font-size: 20px; font-weight: bold; text-shadow: 0 2px 4px #000; pointer-events: none; z-index: 6; }
-        .hp-bar-container { background: #333; width: 150px; height: 15px; border-radius: 8px; border: 2px solid #fff; overflow: hidden; margin-top: 5px; }
-        .hp-fill { height: 100%; background: #ff0055; width: 100%; }
-        .hp-fill.enemy { background: #00d2ff; }
+        * { box-sizing: border-box; user-select: none; -webkit-user-select: none; margin: 0; padding: 0; }
+        body { background-color: #064e3b; font-family: 'Arial', sans-serif; overflow: hidden; display: flex; align-items: center; justify-content: center; height: 100vh; width: 100vw; color: white; }
+        #setupMenu, #lobbyMenu { position: absolute; width: 90%; max-width: 500px; background: rgba(6, 78, 59, 0.95); border: 4px solid #10b981; border-radius: 16px; padding: 20px; z-index: 2000; text-align: center; box-shadow: 0 0 30px rgba(0,0,0,0.7); }
+        h2, h3 { margin-bottom: 15px; color: #34d399; text-shadow: 2px 2px #047857; }
+        input[type="text"] { width: 80%; padding: 10px; border-radius: 8px; border: 2px solid #10b981; background: #022c22; color: white; font-size: 16px; text-align: center; margin-bottom: 15px; }
+        .char-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+        .char-card { background: #047857; border: 2px solid #065f46; border-radius: 8px; padding: 8px; cursor: pointer; font-size: 12px; }
+        .char-card.selected { border-color: #34d399; background: #10b981; box-shadow: 0 0 10px #34d399; }
+        .char-card.locked { opacity: 0.4; background: #1f2937; border-color: #4b5563; }
+        .shop-box { background: #111827; border: 2px dashed #f59e0b; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; }
+        .btn { background: #10b981; color: white; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 4px #047857; text-transform: uppercase; margin: 5px; }
+        .btn:active { transform: translateY(4px); box-shadow: none; }
+        #gameContainer { position: relative; width: 100%; height: 100%; display: none; justify-content: center; align-items: center; background: #022c22; }
+        canvas { background: linear-gradient(to bottom, #064e3b, #022c22); display: block; z-index: 1; }
+        #hud { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; background: rgba(2, 44, 34, 0.85); padding: 10px; border-radius: 8px; border: 2px solid #10b981; z-index: 1000; font-size: 13px; }
     </style>
 </head>
 <body>
 
-<div id="main-menu">
-    <div class="green-box">
-        <button class="green-btn" onclick="openPanel('panel-characters')">KARAKTERLER</button>
-        <button class="green-btn" onclick="openPanel('panel-friends')">ARKADAŞLAR</button>
-        <button class="green-btn" onclick="openPanel('panel-trophy')">KUPA YOLU</button>
-        <button class="green-btn" onclick="openPanel('panel-shop')">DÜKKAN</button>
+<div id="setupMenu">
+    <h2>THE PETS: ARENA V3</h2>
+    <input type="text" id="usernameInp" placeholder="İsmini Yaz..." maxLength="12" value="Oyuncu">
+    
+    <h3>Ana 9'lu Karakter Seçimi</h3>
+    <div class="char-grid" id="charGrid"></div>
+
+    <div class="shop-box" id="dailyShop">
+        <strong>📆 GÜNLÜK DÜKKAN TEKLİFİ:</strong> <span id="shopOfferText">Yükleniyor...</span>
     </div>
 
-    <div class="blue-circle-container">
-        <div class="character-trophy">🏆 <span>340</span></div>
-        <img id="main-char-img" src="gus.png" class="selected-avatar-img" onerror="this.src='https://via.placeholder.com/150/00d2ff/ffffff?text=GUS'">
-        <div class="char-name-txt" id="main-char-name">GUS</div>
-    </div>
-
-    <div class="orange-box">
-        <div class="orange-top">
-            <div class="gold-display">🪙 <span>1250</span></div>
-            <div class="player-profile">
-                <img id="profile-avatar" src="gus.png" class="profile-avatar-img" onerror="this.src='https://via.placeholder.com/45/ffaa00/ffffff?text=GUS'">
-                <div class="profile-info">
-                    <div class="player-name">Darwizl</div>
-                    <div class="player-total-trophies">Toplam: 🏆 1630</div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="hardcore-box" id="hardcore-toggle" onclick="toggleHardcore()">
-            <div class="hardcore-title">HARDCORE</div>
-            <div class="hardcore-desc">Gerçek zamanlı sunucu havuzunda katıksız oyuncu kapışması!</div>
-        </div>
-
-        <div class="orange-bottom">
-            <button class="play-btn" onclick="eslesmeBaslat('1v1')"><span class="btn-title">1 VS 1</span><span class="btn-sub">Hedef: 12 Leş</span></button>
-            <button class="play-btn" onclick="eslesmeBaslat('2v2')"><span class="btn-title">2 VS 2</span><span class="btn-sub">Hedef: 24 Leş</span></button>
-            <button class="play-btn" onclick="eslesmeBaslat('3v3')"><span class="btn-title">3 VS 3</span><span class="btn-sub">Hedef: 36 Leş</span></button>
-            <button class="play-btn" onclick="eslesmeBaslat('4v4')"><span class="btn-title">4 VS 4</span><span class="btn-sub">Hedef: 48 Leş</span></button>
-        </div>
-    </div>
+    <h3>Oyun Modu Seç</h3>
+    <button class="btn" onclick="selectMode(2)">2 Kişilik</button>
+    <button class="btn" onclick="selectMode(3)">3 Kişilik</button>
+    <button class="btn" onclick="selectMode(4)">4 Kişilik</button>
 </div>
 
-<div id="panel-characters" class="overlay-panel">
-    <div class="char-panel-window">
-        <button class="panel-floating-close" onclick="closePanel('panel-characters')">✕</button>
-        <div class="char-layout-green">
-            <img id="preview-img" src="gus.png" onerror="this.src='https://via.placeholder.com/180/00d2ff/ffffff?text=FOOD'">
-            <div class="label-name" id="preview-name">GUS</div>
-        </div>
-        <div class="char-layout-blue">
-            <button id="preview-select-btn" class="select-action-btn" onclick="onaylananKarakteriDegistir()">SEÇİLİ</button>
-        </div>
-        <div class="char-layout-pink">
-            <div class="stat-group">
-                <div class="stat-label"><span>CAN (HP)</span><span id="stat-val-hp">800</span></div>
-                <div class="stat-bar-bg"><div id="stat-bar-hp" class="stat-bar-fill"></div></div>
-            </div>
-            <div class="stat-group">
-                <div class="stat-label"><span>HASAR (ATK)</span><span id="stat-val-atk">100</span></div>
-                <div class="stat-bar-bg"><div id="stat-bar-atk" class="stat-bar-fill"></div></div>
-            </div>
-        </div>
-        <div class="char-layout-orange">
-            <div class="orange-grid-title">Karakterler</div>
-            <div class="char-grid-scroll" id="orange-list-container"></div>
-        </div>
-    </div>
+<div id="lobbyMenu" style="display:none;">
+    <h2 id="lobbyStatus">DİĞER OYUNCULAR BEKLENİYOR...</h2>
+    <div id="lobbyCount" style="font-size: 24px; margin: 15px 0; font-weight: bold; color: #34d399;">1 / 2</div>
+    <p style="font-size: 12px; color:#a7f3d0;">Oda dolduğunda yeşillik arenasına otomatik ışınlanacaksınız!</p>
 </div>
 
-<div id="game-stage">
-    <div class="game-ui">
-        <div><span id="ui-my-name">Darwizl</span> (Sen)<div class="hp-bar-container"><div id="my-hp-fill" class="hp-fill"></div></div></div>
-        <div style="font-size: 26px; color: #ffaa00;" id="ui-score">0 - 0</div>
-        <div><span id="ui-enemy-name">Rakip</span><div class="hp-bar-container"><div id="enemy-hp-fill" class="hp-fill enemy"></div></div></div>
+<div id="gameContainer">
+    <canvas id="gameCanvas" width="800" height="450"></canvas>
+    <div id="hud">
+        <div>Mod: <span id="hudMode" style="color:#34d399;">Yükleniyor</span></div>
+        <div>Karakter: <span id="hudChar" style="color:#f59e0b;">-</span></div>
+        <div>X: <span id="xPos">0</span> | Y: <span id="yPos">0</span></div>
     </div>
-    <canvas id="battleCanvas"></canvas>
 </div>
-
-<div id="panel-friends" class="overlay-panel"><div class="panel-window"><button class="close-btn" onclick="closePanel('panel-friends')">✕</button><div class="panel-title">Arkadaşlar</div><div class="panel-content"><p style="color: #aaa;">Çevrimiçi arkadaş bulunmuyor.</p></div></div></div>
-<div id="panel-trophy" class="overlay-panel"><div class="panel-window"><button class="close-btn" onclick="closePanel('panel-trophy')">✕</button><div class="panel-title">Kupa Yolu</div><div class="panel-content"><div style="background:#24263e; padding:20px; border-radius:12px; border:2px solid #00d2ff; text-align:center;"><h3>🏆 2000 Kupa Hedefi</h3><p style="color: #ffaa00; margin-top:10px;">Büyük Ödül: Efsanevi Paket!</p></div></div></div></div>
-<div id="panel-shop" class="overlay-panel"><div class="panel-window"><button class="close-btn" onclick="closePanel('panel-shop')">✕</button><div class="panel-title">Yemek Dükkanı</div><div class="panel-content"><div style="background:#2b1f30; padding:20px; border-radius:12px; border:2px solid #e6005c; text-align:center;"><h3>Mühimmat Takviyesi</h3><p style="color: #ffd700; margin-top:5px;">🪙 2500 Altın Paketi</p></div></div></div></div>
-<div id="panel-matchmaking" class="overlay-panel"><div class="match-box"><h3 id="match-status-title">Eşleşme Aranıyor...</h3><p id="match-status-desc">Veritabanı üzerinden rakipler taranıyor.</p><button onclick="eslesmeIptal()">Sıradan Çık</button></div></div>
 
 <script>
-    // Firebase Bağlantısı
-    const firebaseConfig = { databaseURL: "https://tomoyunu-5cd2f-default-rtdb.europe-west1.firebasedatabase.app/" };
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+// --- FIREBASE KURULUMU ---
+const firebaseConfig = { databaseURL: "https://tomoyunu-5cd2f-default-rtdb.europe-west1.firebasedatabase.app/" };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-    let oyuncuAdi = "Darwizl";
-    let seciliMod = "1v1";
-    let mevcutOdaId = null;
-    let isHardcore = false;
+// GÜNCELLENEN YENİ ANA 9'LU VE ÖZEL GÜÇLERİ
+const CHARACTERS = {
+    Moosey: { speed: 5.0, jump: -11.5, dashCd: 40, dashPower: 15, wallSlide: 0.25, gravMult: 1.0, color: "#10b981", desc: "Dengeli Geyik Hızı" },
+    Sugar:  { speed: 4.8, jump: -13.0, dashCd: 45, dashPower: 14, wallSlide: 0.25, gravMult: 1.0, color: "#f43f5e", desc: "Yüksek Pop Zıplaması" },
+    Squeak: { speed: 4.9, jump: -11.0, dashCd: 42, dashPower: 14, wallSlide: 0.08, gravMult: 1.0, color: "#38bdf8", desc: "Yapışkan Jöle Tutuşu" },
+    Gus:    { speed: 4.5, jump: -11.2, dashCd: 55, dashPower: 22, wallSlide: 0.35, gravMult: 1.0, color: "#eab308", desc: "Devasa İleri Dash" },
+    Dot:    { speed: 5.5, jump: -10.8, dashCd: 38, dashPower: 15, wallSlide: 0.22, gravMult: 1.0, color: "#a855f7", desc: "Ultra Seri Koşucu" },
+    Flip:   { speed: 5.1, jump: -11.4, dashCd: 40, dashPower: 16, wallSlide: 0.20, gravMult: 1.0, color: "#f97316", desc: "Akrobatik Duvar İtişi" },
+    Yeyet:  { speed: 4.7, jump: -11.0, dashCd: 25, dashPower: 13, wallSlide: 0.28, gravMult: 1.0, color: "#ec4899", desc: "Ardı Ardına Hızlı Dash" },
+    Blook:  { speed: 5.2, jump: -11.2, dashCd: 40, dashPower: 15, wallSlide: 0.24, gravMult: 1.0, color: "#8b5cf6", desc: "Keskin Çikolata Dönüşü" },
+    Blinky: { speed: 4.8, jump: -11.6, dashCd: 45, dashPower: 14, wallSlide: 0.20, gravMult: 0.8, color: "#14b8a6", desc: "Hafif Yerçekimi Süzülmesi" }
+};
 
-    const characters = {
-        gus:    { name: "GUS",    src: "gus.png",    color: "#00d2ff", hp: 800, atk: 100 },
-        flip:   { name: "FLIP",   src: "flip.png",   color: "#a83232", hp: 750, atk: 50  },
-        blook:  { name: "BLOOK",  src: "blook.png",  color: "#4E9F3D", hp: 700, atk: 40  },
-        dot:    { name: "DOT",    src: "dot.png",    color: "#ffaa00", hp: 650, atk: 110 },
-        squeak: { name: "SQUEAK", src: "squeak.png", color: "#9c32a8", hp: 600, atk: 80  },
-        yeyet:  { name: "YEYET",  src: "yeyet.png",  color: "#32a89e", hp: 550, atk: 90  },
-        moosey: { name: "MOOSEY", src: "moosey.png", color: "#ff0055", hp: 500, atk: 70  },
-        sugar:  { name: "SUGAR",  src: "sugar.png",  color: "#e3a0c7", hp: 450, atk: 120 },
-        blinky: { name: "BLINKY", src: "blinky.png", color: "#e3e0a0", hp: 400, atk: 60  }
-    };
+let selectedChar = "Moosey";
+let myPlayerId = "p_" + Math.random().toString(36).substr(2, 9);
+let currentRoomId = null;
+let targetPlayersCount = 2;
+
+// GÜNLÜK DÜKKAN TEKLİF SİSTEMİ (Her gün havuzdan rastgele 1 tanesi dükkanda listelenir)
+const shopPool = ["Sugar", "Gus", "Flip", "Yeyet", "Blook", "Blinky"];
+const dayOfYear = Math.floor(new Date() / 86400000);
+const dailyShopChar = shopPool[dayOfYear % shopPool.length];
+
+// Menü Arayüzünü Yeni Karakterlere Göre Çiz
+const charGrid = document.getElementById("charGrid");
+Object.keys(CHARACTERS).forEach((name, idx) => {
+    const card = document.createElement("div");
+    card.className = "char-card" + (name === selectedChar ? " selected" : "");
     
-    const MAX_HP_LIMIT = 900;
-    const MAX_ATK_LIMIT = 140;
-    let aktifKarakterId = "gus";        
-    let onizlemeKarakterId = "gus";    
+    // İlk 3 karakter (Moosey, Sugar, Squeak) başlangıçta açık, diğerleri kilitli (günlük teklif hariç)
+    let isLocked = idx >= 3 && name !== dailyShopChar;
+    if (isLocked) card.classList.add("locked");
+    
+    card.innerHTML = `<strong>${name}</strong><br><span style="font-size:9px;color:#a7f3d0;">${CHARACTERS[name].desc}</span>`;
+    card.onclick = () => {
+        if (isLocked) { alert(`${name} şuan kilitli! Yarınki dükkan teklifinde gelebilir veya dükkandan açılabilir.`); return; }
+        document.querySelectorAll(".char-card").forEach(c => c.classList.remove("selected"));
+        card.classList.add("selected");
+        selectedChar = name;
+    };
+    charGrid.appendChild(card);
+});
+document.getElementById("shopOfferText").innerText = `${dailyShopChar.toUpperCase()} BUGÜNE ÖZEL TEKLİFLE KİLİTSİZ VE SEÇİLEBİLİR!`;
 
-    // Karakter Resimlerini Önden Yükle (Canvas Çizimi İçin)
-    const loadedImages = {};
-    Object.keys(characters).forEach(id => {
-        loadedImages[id] = new Image();
-        loadedImages[id].src = characters[id].src;
+// --- OYUN MOTORU AYARLARI ---
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+const WORLD = { width: 4000, height: 600 };
+const camera = { x: 0, y: 0, width: canvas.width, height: canvas.height };
+
+const player = {
+    x: 100, y: 300, w: 34, h: 34, velX: 0, velY: 0,
+    grounded: false, jumping: false, facing: "right",
+    dashTimer: 0, dashCooldown: 0, isDashing: false,
+    onWall: false, wallDir: null
+};
+
+const gravity = 0.48;
+const friction = 0.80;
+let keys = { left: false, right: false, jump: false, dash: false };
+let otherPlayers = {};
+let platforms = [];
+
+// 150 Level Mantığından Türetilen Zorlu Kesitler (Kedisiz)
+const levelChunks = [
+    [{ x: 300, y: 420, w: 60, h: 200 }, { x: 500, y: 300, w: 50, h: 300 }, { x: 700, y: 220, w: 60, h: 400 }],
+    [{ x: 900, y: 480, w: 150, h: 120 }, { x: 1300, y: 440, w: 150, h: 160 }, { x: 1650, y: 380, w: 120, h: 220 }],
+    [{ x: 1900, y: 500, w: 200, h: 100 }, { x: 2000, y: 380, w: 150, h: 30 }, { x: 1900, y: 260, w: 150, h: 30 }],
+    [{ x: 2300, y: 150, w: 40, h: 450 }, { x: 2500, y: 320, w: 40, h: 280 }, { x: 2700, y: 200, w: 40, h: 400 }],
+    [{ x: 2900, y: 450, w: 100, h: 150 }, { x: 3150, y: 380, w: 80, h: 220 }, { x: 3400, y: 500, w: 500, h: 100 }]
+];
+
+function generateRandomMap() {
+    platforms = [{ x: 0, y: 520, w: 300, h: 80 }]; 
+    let shuffled = [...levelChunks].sort(() => Math.random() - 0.5);
+    let offset = 0;
+    shuffled.forEach(chunk => {
+        chunk.forEach(p => {
+            platforms.push({ x: p.x + offset, y: p.y, width: p.w, height: p.h });
+        });
+    });
+    platforms.push({ x: 3850, y: 100, width: 150, height: 500, isFinish: true });
+}
+
+// --- MULTIPLAYER KONTROLLERİ ---
+function selectMode(count) {
+    targetPlayersCount = count;
+    document.getElementById("setupMenu").style.display = "none";
+    document.getElementById("lobbyMenu").style.display = "block";
+    joinRoom();
+}
+
+function joinRoom() {
+    const name = document.getElementById("usernameInp").value || "Oyuncu";
+    const lobbyRef = db.ref("arena_lobbies_" + targetPlayersCount);
+    
+    lobbyRef.once("value", snapshot => {
+        let rooms = snapshot.val() || {};
+        let foundRoom = null;
+
+        for (let rId in rooms) {
+            if (Object.keys(rooms[rId].players || {}).length < targetPlayersCount && !rooms[rId].started) {
+                foundRoom = rId;
+                break;
+            }
+        }
+
+        if (!foundRoom) foundRoom = "room_" + Math.random().toString(36).substr(2, 9);
+        currentRoomId = foundRoom;
+
+        const myPlayerRef = db.ref(`arena_lobbies_${targetPlayersCount}/${currentRoomId}/players/${myPlayerId}`);
+        myPlayerRef.set({
+            name: name,
+            char: selectedChar,
+            x: 100, y: 300,
+            facing: "right"
+        });
+        myPlayerRef.onDisconnect().remove();
+
+        db.ref(`arena_lobbies_${targetPlayersCount}/${currentRoomId}`).on("value", roomSnap => {
+            let roomData = roomSnap.val();
+            if (!roomData) return;
+
+            let pKeys = Object.keys(roomData.players || {});
+            document.getElementById("lobbyCount").innerText = `${pKeys.length} / ${targetPlayersCount}`;
+
+            if (pKeys.length >= targetPlayersCount && !roomData.started) {
+                db.ref(`arena_lobbies_${targetPlayersCount}/${currentRoomId}/started`).set(true);
+            }
+
+            if (roomData.started) {
+                db.ref(`arena_lobbies_${targetPlayersCount}/${currentRoomId}`).off();
+                startTheGame();
+            }
+        });
+    });
+}
+
+function startTheGame() {
+    document.getElementById("lobbyMenu").style.display = "none";
+    document.getElementById("gameContainer").style.display = "flex";
+    
+    document.getElementById("hudMode").innerText = `${targetPlayersCount}'li Arena`;
+    document.getElementById("hudChar").innerText = selectedChar;
+
+    generateRandomMap();
+    resizeGame();
+
+    db.ref(`arena_lobbies_${targetPlayersCount}/${currentRoomId}/players`).on("value", snap => {
+        let allP = snap.val() || {};
+        otherPlayers = {};
+        for(let id in allP) {
+            if(id !== myPlayerId) otherPlayers[id] = allP[id];
+        }
     });
 
-    function openPanel(id) {
-        document.getElementById(id).style.display = 'flex';
-        if(id === 'panel-characters') karakterEkraniniOlustur();
-    }
-    function closePanel(id) { document.getElementById(id).style.display = 'none'; }
-    function toggleHardcore() {
-        isHardcore = !isHardcore;
-        document.getElementById('hardcore-toggle').classList.toggle('selected', isHardcore);
-    }
-
-    function karakterEkraniniOlustur() {
-        const container = document.getElementById('orange-list-container');
-        container.innerHTML = "";
-        Object.keys(characters).forEach(id => {
-            const char = characters[id];
-            const card = document.createElement('div');
-            card.className = `grid-char-card ${id === onizlemeKarakterId ? 'selected-preview' : ''}`;
-            card.innerHTML = `
-                <img src="${char.src}" onerror="this.src='https://via.placeholder.com/45/${char.color.replace('#','')}/ffffff?text=${char.name[0]}'">
-                <div class="grid-char-info">
-                    <span class="grid-char-name" style="color:${char.color};">${char.name}</span>
-                    <span class="grid-char-level">Güç Seviyesi</span>
-                </div>
-            `;
-            card.onclick = () => {
-                onizlemeKarakterId = id;
-                karakterDetaylariniYenile();
-                karakterEkraniniOlustur(); 
-            };
-            container.appendChild(card);
+    setInterval(() => {
+        db.ref(`arena_lobbies_${targetPlayersCount}/${currentRoomId}/players/${myPlayerId}`).update({
+            x: player.x, y: player.y, facing: player.facing
         });
-        karakterDetaylariniYenile();
-    }
+    }, 45);
 
-    function karakterDetaylariniYenile() {
-        const char = characters[onizlemeKarakterId];
-        document.getElementById('preview-img').src = char.src;
-        document.getElementById('preview-name').innerText = char.name;
-        document.getElementById('preview-name').style.color = char.color;
-        document.getElementById('stat-val-hp').innerText = char.hp;
-        document.getElementById('stat-val-atk').innerText = char.atk;
-        
-        document.getElementById('stat-bar-hp').style.width = (char.hp / MAX_HP_LIMIT) * 100 + "%";
-        document.getElementById('stat-bar-atk').style.width = (char.atk / MAX_ATK_LIMIT) * 100 + "%";
+    gameLoop();
+}
 
-        const btn = document.getElementById('preview-select-btn');
-        if (onizlemeKarakterId === aktifKarakterId) {
-            btn.innerText = "SEÇİLİ";
-            btn.className = "select-action-btn current";
-        } else {
-            btn.innerText = "YENİ KARAKTER SEÇ";
-            btn.className = "select-action-btn";
-        }
-    }
+// --- FİZİK GÜNCELLEMELERİ ---
+window.addEventListener("keydown", (e) => {
+    if (e.code === "ArrowLeft" || e.code === "KeyA") keys.left = true;
+    if (e.code === "ArrowRight" || e.code === "KeyD") keys.right = true;
+    if (e.code === "ArrowUp" || e.code === "Space" || e.code === "KeyW") keys.jump = true;
+    if (e.code === "ShiftLeft" || e.code === "ShiftRight") keys.dash = true;
+});
+window.addEventListener("keyup", (e) => {
+    if (e.code === "ArrowLeft" || e.code === "KeyA") keys.left = false;
+    if (e.code === "ArrowRight" || e.code === "KeyD") keys.right = false;
+    if (e.code === "ArrowUp" || e.code === "Space" || e.code === "KeyW") keys.jump = false;
+    if (e.code === "ShiftLeft" || e.code === "ShiftRight") keys.dash = false;
+});
 
-    function onaylananKarakteriDegistir() {
-        if (onizlemeKarakterId === aktifKarakterId) return;
-        aktifKarakterId = onizlemeKarakterId;
-        const char = characters[aktifKarakterId];
-        document.getElementById('main-char-name').innerText = char.name;
-        document.getElementById('main-char-img').src = char.src;
-        document.getElementById('profile-avatar').src = char.src;
-        closePanel('panel-characters');
-    }
+function update() {
+    const stats = CHARACTERS[selectedChar];
 
-    // -----------------------------------------
-    // MATCHMAKING ALTYAPISI
-    // -----------------------------------------
-    function eslesmeBaslat(mod) {
-        seciliMod = mod;
-        document.getElementById('panel-matchmaking').style.display = 'flex';
-        document.getElementById('match-status-title').innerText = `${mod.toUpperCase()} ARANIYOR...`;
-        const poolRef = database.ref('match_pools/' + mod);
-
-        poolRef.once('value', (snapshot) => {
-            if (snapshot.exists()) {
-                const rooms = snapshot.val();
-                const roomId = Object.keys(rooms)[0];
-                mevcutOdaId = roomId;
-
-                database.ref('live_arenas/' + roomId).set({
-                    mod: seciliMod, hardcore: isHardcore, status: "ready",
-                    p1_name: rooms[roomId].player, p1_char: rooms[roomId].char,
-                    p2_name: oyuncuAdi, p2_char: aktifKarakterId,
-                    p1_x: 150, p1_y: 400, p1_dir: 1,
-                    p2_x: 650, p2_y: 400, p2_dir: -1
-                }).then(() => {
-                    poolRef.child(roomId).remove();
-                    savasSahnesiniYukle(roomId, "player2");
-                });
-            } else {
-                const newRoomRef = poolRef.push();
-                mevcutOdaId = newRoomRef.key;
-                newRoomRef.set({ player: oyuncuAdi, char: aktifKarakterId, time: firebase.database.ServerValue.TIMESTAMP });
-
-                database.ref('live_arenas/' + mevcutOdaId).on('value', (gameSnapshot) => {
-                    if (gameSnapshot.exists() && gameSnapshot.val().status === "ready") {
-                        database.ref('live_arenas/' + mevcutOdaId).off();
-                        savasSahnesiniYukle(mevcutOdaId, "player1");
-                    }
-                });
-            }
-        });
-    }
-
-    function eslesmeIptal() {
-        if (mevcutOdaId && seciliMod) {
-            database.ref('match_pools/' + seciliMod + '/' + mevcutOdaId).remove();
-            database.ref('live_arenas/' + mevcutOdaId).off();
-        }
-        document.getElementById('panel-matchmaking').style.display = 'none';
-    }
-
-    // -----------------------------------------
-    // GELİŞMİŞ FİZİKLİ 2D SAVAŞ MOTORU (CANVAS)
-    // -----------------------------------------
-    const canvas = document.getElementById("battleCanvas");
-    const ctx = canvas.getContext("2d");
-    let gameInterval, syncInterval, myRole = "", roomDataRef = null;
+    if (player.dashCooldown > 0) player.dashCooldown--;
     
-    // Gelişmiş Fizik State Değerleri
-    let gameState = {
-        p1_x: 150, p1_y: 400, p1_vy: 0, p1_dir: 1, p1_hp: 100, p1_char: "gus",
-        p2_x: 650, p2_y: 400, p2_vy: 0, p2_dir: -1, p2_hp: 100, p2_char: "gus",
-        bullets: []
-    };
+    if (keys.dash && player.dashCooldown === 0 && !player.isDashing) {
+        player.isDashing = true;
+        player.dashTimer = 10;
+        player.dashCooldown = stats.dashCd;
+        player.velY = 0;
+    }
+
+    if (player.isDashing) {
+        player.velX = player.facing === "right" ? stats.dashPower : -stats.dashPower;
+        player.dashTimer--;
+        if (player.dashTimer <= 0) player.isDashing = false;
+    } else {
+        if (keys.left) { player.velX -= 0.6; player.facing = "left"; }
+        if (keys.right) { player.velX += 0.6; player.facing = "right"; }
+    }
+
+    player.velX *= friction;
     
-    // Sabit Çevre Verileri
-    const GRAVITY = 0.5;
-    const JUMP_FORCE = -12;
-    const GROUND_Y = 450; // Karakterlerin basacağı yer çizgisi tabanı
-    const CHAR_RADIUS = 35; // Vurulma alanı genişliği
+    if (player.onWall && player.velY > 0) {
+        player.velY += (gravity * stats.gravMult) * stats.wallSlide; 
+    } else {
+        player.velY += (gravity * stats.gravMult);
+    }
 
-    let keys = {};
-    window.addEventListener("keydown", e => {
-        keys[e.code] = true;
-        // Zıplama Tetikleyicisi (Yerdeyken W veya Üst Ok)
-        if (e.code === "KeyW" || e.code === "ArrowUp") {
-            if (myRole === "player1" && gameState.p1_y >= GROUND_Y) gameState.p1_vy = JUMP_FORCE;
-            if (myRole === "player2" && gameState.p2_y >= GROUND_Y) gameState.p2_vy = JUMP_FORCE;
-        }
-        // Boşluk Tuşu ile Ateş Etme
-        if (e.code === "Space") mermiAtesle();
-    });
-    window.addEventListener("keyup", e => keys[e.code] = false);
+    player.grounded = false; player.onWall = false;
 
-    function savasSahnesiniYukle(roomId, role) {
-        myRole = role;
-        document.getElementById('panel-matchmaking').style.display = 'none';
-        document.getElementById('main-menu').style.display = 'none';
-        document.getElementById('game-stage').style.display = 'block';
+    platforms.forEach(p => {
+        let pX = p.x, pY = p.y, pW = p.width, pH = p.height;
+        if (player.x < pX + pW && player.x + player.w > pX && player.y < pY + pH && player.y + player.h > pY) {
+            if(p.isFinish) {
+                alert("TEBRİKLER! Arenayı Birinci Bitirdin!");
+                player.x = 100; player.y = 300;
+                return;
+            }
+            let oX = (player.x + player.w/2 < pX + pW/2) ? (player.x + player.w) - pX : pX + pW - player.x;
+            let oY = (player.y + player.h/2 < pY + pH/2) ? (player.y + player.h) - pY : pY + pH - player.y;
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        roomDataRef = database.ref('live_arenas/' + roomId);
-        
-        roomDataRef.once('value', snap => {
-            const data = snap.val();
-            document.getElementById("ui-my-name").innerText = role === "player1" ? data.p1_name : data.p2_name;
-            document.getElementById("ui-enemy-name").innerText = role === "player1" ? data.p2_name : data.p1_name;
-            gameState.p1_char = data.p1_char;
-            gameState.p2_char = data.p2_char;
-        });
-
-        // Veritabanı Değişim Dinleyicisi
-        roomDataRef.on('value', snap => {
-            if (!snap.exists()) return;
-            const data = snap.val();
-            
-            // Karşı oyuncunun hareket verilerini eşitle
-            if (myRole === "player2") {
-                gameState.p1_x = data.p1_x;
-                gameState.p1_y = data.p1_y;
-                gameState.p1_dir = data.p1_dir;
+            if (oX >= oY) {
+                if (player.y + player.h/2 > pY + pH/2) { player.y += oY; player.velY = 0; }
+                else { player.grounded = true; player.jumping = false; player.y -= oY; player.velY = 0; }
             } else {
-                gameState.p2_x = data.p2_x;
-                gameState.p2_y = data.p2_y;
-                gameState.p2_dir = data.p2_dir;
-            }
-            
-            // Karşıdan gelen mermiyi yakala
-            if (data.remote_bullet && data.sender !== myRole) {
-                gameState.bullets.push({
-                    x: data.remote_bullet.x,
-                    y: data.remote_bullet.y,
-                    dx: data.remote_bullet.dx,
-                    owner: "enemy"
-                });
-                roomDataRef.child("remote_bullet").remove();
-            }
-        });
-
-        gameInterval = setInterval(gameUpdate, 1000 / 60);
-        syncInterval = setInterval(dbSync, 1000 / 30);
-    }
-
-    function mermiAtesle() {
-        let isP1 = (myRole === "player1");
-        let bx = isP1 ? gameState.p1_x : gameState.p2_x;
-        let by = isP1 ? gameState.p1_y - 10 : gameState.p2_y - 10; // Silah hizası yüksekliği
-        let bDir = isP1 ? gameState.p1_dir : gameState.p2_dir;
-        let bdx = bDir * 12; // Baktığı yöne doğru hız vektörü
-
-        gameState.bullets.push({ x: bx, y: by, dx: bdx, owner: "me" });
-        roomDataRef.child("remote_bullet").set({ x: bx, y: by, dx: bdx });
-        roomDataRef.child("sender").set(myRole);
-    }
-
-    function gameUpdate() {
-        let speed = 6;
-
-        // Player 1 Fizik ve Girdileri
-        if (myRole === "player1") {
-            if (keys["KeyA"] || keys["ArrowLeft"]) { gameState.p1_x -= speed; gameState.p1_dir = -1; }
-            if (keys["KeyD"] || keys["ArrowRight"]) { gameState.p1_x += speed; gameState.p1_dir = 1; }
-            
-            gameState.p1_vy += GRAVITY;
-            gameState.p1_y += gameState.p1_vy;
-            if (gameState.p1_y >= GROUND_Y) { gameState.p1_y = GROUND_Y; gameState.p1_vy = 0; }
-        } 
-        // Player 2 Fizik ve Girdileri
-        else {
-            if (keys["KeyA"] || keys["ArrowLeft"]) { gameState.p2_x -= speed; gameState.p2_dir = -1; }
-            if (keys["KeyD"] || keys["ArrowRight"]) { gameState.p2_x += speed; gameState.p2_dir = 1; }
-            
-            gameState.p2_vy += GRAVITY;
-            gameState.p2_y += gameState.p2_vy;
-            if (gameState.p2_y >= GROUND_Y) { gameState.p2_y = GROUND_Y; gameState.p2_vy = 0; }
-        }
-
-        // --- CANVAS ÇİZİM AŞAMASI ---
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Arka Plan Çizgisi (Zemin)
-        ctx.strokeStyle = "#4E9F3D";
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.moveTo(0, GROUND_Y + CHAR_RADIUS);
-        ctx.lineTo(canvas.width, GROUND_Y + CHAR_RADIUS);
-        ctx.stroke();
-
-        // 1. OYUNCU ÇİZİMİ (Sağa/Sola Döndürülebilir Görsel)
-        drawCharacter(gameState.p1_x, gameState.p1_y, gameState.p1_char, gameState.p1_dir, "#00d2ff");
-
-        // 2. OYUNCU ÇİZİMİ (Sağa/Sola Döndürülebilir Görsel)
-        drawCharacter(gameState.p2_x, gameState.p2_y, gameState.p2_char, gameState.p2_dir, "#ff0055");
-
-        // MERMİLERİN HAREKETİ VE HITBOX KONTROLÜ
-        gameState.bullets.forEach((b, idx) => {
-            b.x += b.dx;
-            
-            // Parlayan mermi efekti
-            ctx.fillStyle = b.owner === "me" ? "#ffd700" : "#ff3333";
-            ctx.beginPath(); 
-            ctx.arc(b.x, b.y, 6, 0, Math.PI * 2); 
-            ctx.fill();
-
-            // Mermi bana aitse rakibe çarpıp çarpmadığını kontrol et
-            if (b.owner === "me") {
-                let tx = myRole === "player1" ? gameState.p2_x : gameState.p1_x;
-                let ty = myRole === "player1" ? gameState.p2_y : gameState.p1_y;
-                
-                // İki nokta arası mesafe formülü ile hitbox doğrulaması
-                if (Math.hypot(b.x - tx, b.y - ty) < CHAR_RADIUS) {
-                    gameState.bullets.splice(idx, 1);
-                    hitRegistered();
+                if (player.x + player.w/2 > pX + pW/2) {
+                    player.x += oX; player.velX = 0;
+                    if(!player.grounded && keys.left) { player.onWall = true; player.wallDir = "left"; }
+                } else {
+                    player.x -= oX; player.velX = 0;
+                    if(!player.grounded && keys.right) { player.onWall = true; player.wallDir = "right"; }
                 }
             }
-            
-            // Ekran dışına çıkan mermileri bellekten temizle
-            if (b.x < 0 || b.x > canvas.width) gameState.bullets.splice(idx, 1);
-        });
-    }
-
-    // Karakterleri baktığı yöne (X ekseninde scale) göre çizen fonksiyon
-    function drawCharacter(x, y, charId, direction, strokeColor) {
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.scale(direction, 1); // 1 ise normal, -1 ise resmi yatayda tam tersine katlar (Flip)
-
-        const img = loadedImages[charId];
-        if (img && img.complete && img.naturalWidth !== 0) {
-            // Görsel yüklendiyse merkezcil olarak çiz
-            ctx.drawImage(img, -CHAR_RADIUS, -CHAR_RADIUS, CHAR_RADIUS * 2, CHAR_RADIUS * 2);
-        } else {
-            // Görsel gelmediyse geçici yuvarlak şablon bas
-            ctx.fillStyle = strokeColor;
-            ctx.beginPath();
-            ctx.arc(0, 0, CHAR_RADIUS, 0, Math.PI * 2);
-            ctx.fill();
         }
+    });
 
-        // Seçim halkası tabanı
-        ctx.strokeStyle = strokeColor;
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(0, 0, CHAR_RADIUS, 0, Math.PI * 2);
-        ctx.stroke();
-
-        ctx.restore();
+    if (keys.jump && !player.jumping) {
+        if (player.grounded) { player.jumping = true; player.velY = stats.jump; }
+        else if (player.onWall) {
+            player.jumping = true; 
+            player.velY = stats.jump * 0.9;
+            // Flip duvar zıplamasında ekstra güç kazanır
+            let pushForce = (selectedChar === "Flip") ? 10 : 7;
+            player.velX = player.wallDir === "left" ? pushForce : -pushForce;
+            player.facing = player.wallDir === "left" ? "right" : "left";
+        }
     }
 
-    function hitRegistered() {
-        if (myRole === "player1") gameState.p2_hp -= 5; else gameState.p1_hp -= 5;
-        document.getElementById("my-hp-fill").style.width = (myRole === "player1" ? gameState.p1_hp : gameState.p2_hp) + "%";
-        document.getElementById("enemy-hp-fill").style.width = (myRole === "player1" ? gameState.p2_hp : gameState.p1_hp) + "%";
+    player.x += player.velX; player.y += player.velY;
+    if (player.x < 0) player.x = 0;
+    if (player.y > WORLD.height) { player.x = 100; player.y = 300; player.velX = 0; player.velY = 0; }
+
+    camera.x = player.x - canvas.width / 2;
+    if (camera.x < 0) camera.x = 0;
+    if (camera.x > WORLD.width - canvas.width) camera.x = WORLD.width - canvas.width;
+    
+    document.getElementById("xPos").innerText = Math.floor(player.x);
+    document.getElementById("yPos").innerText = Math.floor(player.y);
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(-camera.x, -camera.y);
+
+    // Yeşillik / Neon Çimen Teması Matris Izgaraları
+    ctx.strokeStyle = "rgba(16, 185, 129, 0.04)";
+    for(let x=0; x<WORLD.width; x+=60) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,WORLD.height); ctx.stroke(); }
+
+    // Platform Çizimleri (V3 Orman ve Sarmaşık Teması)
+    platforms.forEach(p => {
+        ctx.fillStyle = p.isFinish ? "#f59e0b" : "#065f46"; 
+        ctx.fillRect(p.x, p.y, p.width, p.height);
         
-        if(gameState.p1_hp <= 0 || gameState.p2_hp <= 0) {
-            clearInterval(gameInterval); 
-            clearInterval(syncInterval);
-            alert("Savaş Bitti!");
-            location.reload();
-        }
+        // Parlak Yeşil Neon Şerit Üst Sınır
+        ctx.fillStyle = p.isFinish ? "#fff" : "#34d399";
+        ctx.fillRect(p.x, p.y, p.width, 6);
+    });
+
+    // Diğer Rakipleri Çiz
+    for (let id in otherPlayers) {
+        let op = otherPlayers[id];
+        let opStats = CHARACTERS[op.char] || CHARACTERS.Moosey;
+        ctx.fillStyle = opStats.color;
+        ctx.globalAlpha = 0.55;
+        ctx.fillRect(op.x, op.y, player.w, player.h);
+        
+        ctx.globalAlpha = 1.0;
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 11px Arial";
+        ctx.fillText(op.name, op.x, op.y - 8);
     }
 
-    function dbSync() {
-        if (!roomDataRef) return;
-        if (myRole === "player1") {
-            roomDataRef.child("p1_x").set(gameState.p1_x);
-            roomDataRef.child("p1_y").set(gameState.p1_y);
-            roomDataRef.child("p1_dir").set(gameState.p1_dir);
-        } else {
-            roomDataRef.child("p2_x").set(gameState.p2_x);
-            roomDataRef.child("p2_y").set(gameState.p2_y);
-            roomDataRef.child("p2_dir").set(gameState.p2_dir);
-        }
-    }
+    // Kendini Çiz
+    ctx.fillStyle = CHARACTERS[selectedChar].color;
+    ctx.fillRect(player.x, player.y, player.w, player.h);
+    
+    // Baktığı Yön Göz Detayı
+    ctx.fillStyle = "#fff";
+    let eyeX = player.facing === "right" ? player.x + player.w - 10 : player.x + 4;
+    ctx.fillRect(eyeX, player.y + 8, 6, 6);
+
+    ctx.restore();
+}
+
+function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+function resizeGame() {
+    const w = window.innerWidth, h = window.innerHeight, r = 800/450;
+    if (w/h > r) { canvas.style.width = (h*r)+"px"; canvas.style.height = h+"px"; }
+    else { canvas.style.width = w+"px"; canvas.style.height = (w/r)+"px"; }
+}
+window.addEventListener("resize", resizeGame);
 </script>
 </body>
 </html>
